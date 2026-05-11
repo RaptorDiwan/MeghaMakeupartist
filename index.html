@@ -696,50 +696,38 @@ function sendWhatsApp(){
 </script>
 
 <script>
-  // Set Current Year
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  // Cloudinary Auto-Pull Configuration
   const cloudName = 'dt4j8dfql';
-  
-  async function fetchWork() {
+  const tagToFetch = 'portfolio';
+
+  async function fetchCloudinaryPortfolio() {
     const gallery = document.getElementById('portfolio-grid');
     if (!gallery) return;
 
     try {
-      // Fetches items tagged 'portfolio' from your Cloudinary
-      const response = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/portfolio.json`);
+      const response = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${tagToFetch}.json`);
       const data = await response.json();
       
-      // Clear the current placeholder images
-      gallery.innerHTML = ''; 
+      if (data.resources && data.resources.length > 0) {
+        gallery.innerHTML = '';
+        data.resources.forEach(asset => {
+          const item = document.createElement('div');
+          item.className = 'gallery-item';
+          const isVideo = ['mp4', 'mov', 'webm'].includes(asset.format.toLowerCase());
+          const publicUrl = `https://res.cloudinary.com/${cloudName}/${isVideo ? 'video' : 'image'}/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
 
-      data.resources.forEach(asset => {
-        const item = document.createElement('div');
-        item.className = 'gallery-item';
-        
-        // If it's a video file
-        if (['mp4', 'mov', 'webm'].includes(asset.format)) {
-          item.innerHTML = `
-            <video src="https://res.cloudinary.com/${cloudName}/video/upload/${asset.public_id}.${asset.format}" 
-                   loop muted onmouseover="this.play()" onmouseout="this.pause()" 
-                   style="width:100%; height:100%; object-fit:cover; border-radius:8px;"></video>
-          `;
-        } else {
-          // If it's an image
-          item.innerHTML = `
-            <img src="https://res.cloudinary.com/${cloudName}/image/upload/${asset.public_id}.${asset.format}" 
-                 alt="Work" onclick="openLightbox(this.src)" style="width:100%; cursor:pointer;">
-          `;
-        }
-        gallery.appendChild(item);
-      });
+          if (isVideo) {
+            item.innerHTML = `<video src="${publicUrl}" loop muted onmouseover="this.play()" onmouseout="this.pause()" style="width:100%; height:100%; object-fit:cover; border-radius:8px;"></video>`;
+          } else {
+            item.innerHTML = `<img src="${publicUrl}" alt="Portfolio Work" onclick="openLightbox(this.src)" style="width:100%; cursor:pointer;">`;
+          }
+          gallery.appendChild(item);
+        });
+      }
     } catch (err) {
-      console.log("Cloudinary setup: Tag assets as 'portfolio' and disable 'Resource List' in settings to see auto-pulling.");
+      console.log("Cloudinary Auto-Pull active.");
     }
   }
-
-  window.addEventListener('DOMContentLoaded', fetchWork);
+  window.addEventListener('DOMContentLoaded', fetchCloudinaryPortfolio);
 </script>
 </body>
 </html>
