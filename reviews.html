@@ -224,12 +224,11 @@ function toggleVideo(card){
 async function fetchVideoTestimonials(){
   const grid = document.getElementById('video-grid');
   try {
-    const res = await fetch('https://res.cloudinary.com/dt4j8dfql/image/list/reviews.json');
+    const res = await fetch('https://res.cloudinary.com/dt4j8dfql/video/list/reviews.json');
     const data = await res.json();
-    const videos = (data.resources||[]).filter(a=>['mp4','mov','webm'].includes(a.format.toLowerCase()));
-    if(videos.length > 0){
+    if(data.resources && data.resources.length > 0){
       grid.innerHTML='';
-      videos.forEach(asset=>{
+      data.resources.forEach(asset=>{
         const url=`https://res.cloudinary.com/dt4j8dfql/video/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
         const card=document.createElement('div');
         card.className='video-card';

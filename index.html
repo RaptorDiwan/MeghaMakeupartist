@@ -722,50 +722,70 @@ function sendWhatsApp(){
 
 <script>
   const cloudName = 'dt4j8dfql';
-  const tagToFetch = 'portfolio';
 
-  async function fetchCloudinaryPortfolio() {
+  // Fetch portfolio images
+  async function fetchPortfolioImages() {
     const gallery = document.getElementById('portfolio-grid');
-    const reelsGrid = document.getElementById('reels-grid');
-
+    if (!gallery) return;
     try {
-      const response = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${tagToFetch}.json`);
-      const data = await response.json();
-
+      const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/portfolio.json`);
+      const data = await res.json();
       if (data.resources && data.resources.length > 0) {
-        const images = data.resources.filter(a => !['mp4','mov','webm'].includes(a.format.toLowerCase()));
-        const videos = data.resources.filter(a => ['mp4','mov','webm'].includes(a.format.toLowerCase()));
-
-        // Populate gallery
-        if (gallery && images.length > 0) {
-          gallery.innerHTML = '';
-          images.forEach((asset, i) => {
-            const url = `https://res.cloudinary.com/${cloudName}/image/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `<img src="${url}" alt="Portfolio Work by Megha" loading="lazy" onclick="openLightbox(this.src)" style="width:100%;height:100%;object-fit:cover;cursor:pointer;"><div class="gallery-overlay"></div>`;
-            gallery.appendChild(item);
-          });
-        }
-
-        // Populate reels
-        if (reelsGrid && videos.length > 0) {
-          reelsGrid.innerHTML = '';
-          videos.forEach(asset => {
-            const url = `https://res.cloudinary.com/${cloudName}/video/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
-            const card = document.createElement('div');
-            card.className = 'reel-card';
-            card.setAttribute('onclick','toggleReel(this)');
-            card.innerHTML = `<video src="${url}" loop playsinline preload="metadata"></video><div class="reel-play"><div class="play-btn">▶</div></div><span class="reel-label">Behind the Look</span>`;
-            reelsGrid.appendChild(card);
-          });
-        }
+        gallery.innerHTML = '';
+        data.resources.forEach(asset => {
+          const url = `https://res.cloudinary.com/${cloudName}/image/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
+          const item = document.createElement('div');
+          item.className = 'gallery-item';
+          item.innerHTML = `<img src="${url}" alt="Portfolio Work by Megha" loading="lazy" onclick="openLightbox(this.src)" style="width:100%;height:100%;object-fit:cover;cursor:pointer;"><div class="gallery-overlay"></div>`;
+          gallery.appendChild(item);
+        });
       }
-    } catch (err) {
-      console.log("Cloudinary fetch note:", err);
+    } catch(err) {
+      console.log("Portfolio images fetch:", err);
     }
   }
-  window.addEventListener('DOMContentLoaded', fetchCloudinaryPortfolio);
+
+  // Fetch reels videos
+  async function fetchReelsVideos() {
+    const reelsGrid = document.getElementById('reels-grid');
+    if (!reelsGrid) return;
+
+    const fallbackVideos = [
+      'https://res.cloudinary.com/dt4j8dfql/video/upload/v1778427358/SaveClip.App_AQPBJs4vNw9PBEnwYhnBGr341iMfn9dow0XuLI-jbp8M6u714P05qITQf0af6yEwcczEyjRlm-6qL7oKDztDAeXz1dDaKnVBvF9lAgI_j1rkdi.mp4',
+      'https://res.cloudinary.com/dt4j8dfql/video/upload/v1778427358/SaveClip.App_AQOonsUAeQjvodaxv1lNYll3ysj3HAPWVzKxsPxUw8z5-dX0jJLkMoODTIXYgYP7zedMcCt_TOkTVjwzj6iuAj-xbmnEzG_0sDs8exw_pugz8d.mp4',
+      'https://res.cloudinary.com/dt4j8dfql/video/upload/v1778427360/SaveClip.App_AQNwqo9juN3-nb_ppCcV3HzRI98l9NbkvA9MiuSYJ_jYwMgM1PLQDB8ieG4aPVPEg3_wkzaPVqoRPZMF4M5c1yvDERusPO93IeBt-qM_yje79m.mp4',
+      'https://res.cloudinary.com/dt4j8dfql/video/upload/v1778427360/SaveClip.App_AQPwiVu3mF-B75DJGph06khtJ8m9onuSt9-Q6s1Mf4M7YrSgfo8o7hbkdBGAA1vB6DQxUMA86cuWVvMgx7V2SM2EyRP7rZWvdYBZwZA_cyp0ui.mp4'
+    ];
+
+    function renderVideos(urls) {
+      reelsGrid.innerHTML = '';
+      urls.forEach(url => {
+        const card = document.createElement('div');
+        card.className = 'reel-card';
+        card.setAttribute('onclick', 'toggleReel(this)');
+        card.innerHTML = `<video src="${url}" loop playsinline preload="metadata"></video><div class="reel-play"><div class="play-btn">▶</div></div>`;
+        reelsGrid.appendChild(card);
+      });
+    }
+
+    try {
+      const res = await fetch(`https://res.cloudinary.com/${cloudName}/video/list/portfolio.json`);
+      const data = await res.json();
+      if (data.resources && data.resources.length > 0) {
+        const urls = data.resources.map(a => `https://res.cloudinary.com/${cloudName}/video/upload/v${a.version}/${a.public_id}.${a.format}`);
+        renderVideos(urls);
+      } else {
+        renderVideos(fallbackVideos);
+      }
+    } catch(err) {
+      renderVideos(fallbackVideos);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    fetchPortfolioImages();
+    fetchReelsVideos();
+  });
 </script>
 </body>
 </html>
