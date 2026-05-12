@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contact – Megha Makeup Artist | Chennai</title>
+<meta name="description" content="Book Megha, professional makeup artist in Chennai. Bridal, function, celebrity and editorial makeup across Tamil Nadu."/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blush:#f7d6d0;--rose:#e8a598;--deep-rose:#c4726a;
+  --cream:#fdf6f0;--warm-white:#fffaf7;
+  --text-dark:#2e1a1a;--text-mid:#6b3f3f;--text-light:#a07070;
+  --gold:#c9a96e;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--text-dark);overflow-x:hidden}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 48px;
+  background:rgba(253,246,240,0.94);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid #f0d8d0;
+}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--text-dark);text-decoration:none}
+.nav-logo em{color:var(--deep-rose);font-style:italic}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mid);text-decoration:none;transition:color 0.2s}
+.nav-links a:hover,.nav-links a.active{color:var(--deep-rose)}
+.btn-book{
+  background:var(--deep-rose);color:white!important;
+  padding:10px 24px;border-radius:30px;font-size:12px!important;
+  letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;
+  transition:all 0.2s;display:inline-block;
+}
+.btn-book:hover{background:#b5635b;transform:translateY(-1px)}
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--text-dark);margin:5px 0;transition:all 0.3s}
+
+/* PAGE HEADER */
+.page-header{
+  padding:140px 48px 60px;
+  text-align:center;
+  background:linear-gradient(160deg,var(--cream) 0%,var(--warm-white) 100%);
+  border-bottom:1px solid #f0d8d0;
+}
+.section-tag{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--deep-rose);margin-bottom:12px;display:block}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,60px);color:var(--text-dark);line-height:1.15;margin-bottom:16px}
+.page-title em{color:var(--deep-rose);font-style:italic}
+.page-sub{font-size:16px;color:var(--text-light);max-width:480px;margin:0 auto;line-height:1.8;font-weight:300}
+
+/* CONTACT BODY */
+.contact-section{padding:80px 48px 100px}
+.contact-inner{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;
+}
+.contact-detail{display:flex;gap:16px;align-items:flex-start;margin-bottom:24px}
+.contact-icon{width:44px;height:44px;border-radius:50%;background:var(--blush);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.contact-text h4{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--deep-rose);margin-bottom:4px}
+.contact-text p,.contact-text a{font-size:15px;color:var(--text-mid);text-decoration:none}
+.contact-text a:hover{color:var(--deep-rose)}
+.btn-primary{
+  background:var(--deep-rose);color:white;
+  padding:14px 32px;border-radius:30px;
+  font-size:13px;letter-spacing:1.5px;text-transform:uppercase;
+  text-decoration:none;display:inline-block;
+  transition:all 0.2s;
+}
+.btn-primary:hover{background:#b5635b;transform:translateY(-2px)}
+
+/* FORM */
+.contact-form{background:var(--cream);border-radius:24px;padding:40px;border:1px solid #f0d8d0}
+.contact-form h3{font-family:'Playfair Display',serif;font-size:24px;color:var(--text-dark);margin-bottom:26px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:12px 16px;
+  border:1.5px solid #e8d0cc;border-radius:10px;
+  background:white;
+  font-family:'Jost',sans-serif;font-size:14px;color:var(--text-dark);
+  outline:none;transition:border-color 0.2s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--deep-rose)}
+.form-group textarea{height:100px;resize:vertical}
+.btn-submit{
+  width:100%;background:var(--deep-rose);color:white;
+  border:none;padding:14px;border-radius:12px;
+  font-family:'Jost',sans-serif;font-size:13px;letter-spacing:2px;
+  text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;margin-top:6px;
+}
+.btn-submit:hover{background:#b5635b;transform:translateY(-1px)}
+
+/* FOOTER */
+footer{background:var(--text-dark);color:white;padding:48px 48px 28px;text-align:center}
+.footer-logo{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:12px}
+.footer-logo em{color:var(--rose);font-style:italic}
+footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
+.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.footer-links a{color:#d4a098;font-size:11px;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color 0.2s}
+.footer-links a:hover{color:white}
+.footer-bottom{border-top:1px solid #4a2f2f;padding-top:18px;font-size:12px;color:#6b4040}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-links{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:99}
+  .nav-links.open{display:flex}
+  .nav-toggle{display:block;position:relative;z-index:100}
+  .page-header{padding:110px 24px 48px}
+  .contact-section{padding:48px 20px 72px}
+  .contact-inner{grid-template-columns:1fr;gap:40px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo"><em>Megha</em> — Makeup Artist</a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html#about">About</a>
+    <a href="index.html#services">Services</a>
+    <a href="work.html">Work</a>
+    <a href="index.html#reels">Reels</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="contact.html" class="active">Contact</a>
+    <a href="https://wa.me/917904417048" class="btn-book" target="_blank">Book Now</a>
+  </div>
+  <button class="nav-toggle" id="navToggle" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <span class="section-tag">✦ Let's Connect</span>
+  <h1 class="page-title">Ready to Look <em>Incredible?</em></h1>
+  <p class="page-sub">Reach out to check availability, ask about services, or simply say hello. Based in Chennai, available across all of Tamil Nadu.</p>
+</div>
+
+<!-- CONTACT -->
+<section class="contact-section">
+  <div class="contact-inner">
+    <div>
+      <div class="contact-detail">
+        <div class="contact-icon">📍</div>
+        <div class="contact-text"><h4>Location</h4><p>Chennai, Tamil Nadu · Available across TN</p></div>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-icon">💬</div>
+        <div class="contact-text"><h4>WhatsApp</h4><p><a href="https://wa.me/917904417048" target="_blank">+91 79044 17048</a></p></div>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-icon">📸</div>
+        <div class="contact-text"><h4>Instagram</h4><p><a href="https://www.instagram.com/megha_.makeupartist/" target="_blank">@megha_.makeupartist</a></p></div>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-icon">✈️</div>
+        <div class="contact-text"><h4>Travel</h4><p>Open to travel across Tamil Nadu</p></div>
+      </div>
+      <a href="https://wa.me/917904417048" class="btn-primary" target="_blank" style="margin-top:28px">Book via WhatsApp →</a>
+    </div>
+    <div class="contact-form">
+      <h3>Send a Message</h3>
+      <div class="form-group"><label>Your Name</label><input type="text" id="f-name" placeholder="Kavitha Rajendran"/></div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" id="f-phone" placeholder="+91 98765 43210"/></div>
+      <div class="form-group"><label>Event Date</label><input type="date" id="f-date"/></div>
+      <div class="form-group"><label>Service Required</label>
+        <select id="f-service">
+          <option>Bridal Makeup</option>
+          <option>Function Makeup</option>
+          <option>Celebrity / VIP</option>
+          <option>Editorial / Shoot</option>
+          <option>Party Glam</option>
+          <option>Natural / HD Makeup</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Your Message</label><textarea id="f-msg" placeholder="Tell Megha about your event…"></textarea></div>
+      <button class="btn-submit" onclick="sendWhatsApp()">Send via WhatsApp →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><em>Megha</em> — Makeup Artist</div>
+  <p>Makeup Artist · Chennai · Tamil Nadu</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="work.html">Work</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://wa.me/917904417048" target="_blank">WhatsApp</a>
+  </div>
+  <div class="footer-bottom">&copy; <span id="footer-year"></span> Megha Makeup Artist. All rights reserved. · Chennai, Tamil Nadu</div>
+</footer>
+
+<script>
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+function toggleNav(){document.getElementById('navLinks').classList.toggle('open')}
+
+function sendWhatsApp(){
+  const name = document.getElementById('f-name').value || '';
+  const phone = document.getElementById('f-phone').value || '';
+  const date = document.getElementById('f-date').value || '';
+  const service = document.getElementById('f-service').value || '';
+  const msg = document.getElementById('f-msg').value || '';
+  const text = `Hi Megha! I'd like to book a session.%0AName: ${name}%0APhone: ${phone}%0ADate: ${date}%0AService: ${service}%0AMessage: ${msg}`;
+  window.open(`https://wa.me/917904417048?text=${text}`, '_blank');
+}
+</script>
+</body>
+</html>

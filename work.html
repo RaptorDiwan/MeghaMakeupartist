@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Work – Megha Makeup Artist | Chennai</title>
+<meta name="description" content="Portfolio of Megha, professional makeup artist in Chennai. Bridal, function, editorial and celebrity makeup looks."/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blush:#f7d6d0;--rose:#e8a598;--deep-rose:#c4726a;
+  --cream:#fdf6f0;--warm-white:#fffaf7;
+  --text-dark:#2e1a1a;--text-mid:#6b3f3f;--text-light:#a07070;
+  --gold:#c9a96e;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--text-dark);overflow-x:hidden}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 48px;
+  background:rgba(253,246,240,0.94);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid #f0d8d0;
+}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--text-dark);text-decoration:none}
+.nav-logo em{color:var(--deep-rose);font-style:italic}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mid);text-decoration:none;transition:color 0.2s}
+.nav-links a:hover,.nav-links a.active{color:var(--deep-rose)}
+.btn-book{
+  background:var(--deep-rose);color:white!important;
+  padding:10px 24px;border-radius:30px;font-size:12px!important;
+  letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;
+  transition:all 0.2s;display:inline-block;
+}
+.btn-book:hover{background:#b5635b;transform:translateY(-1px)}
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--text-dark);margin:5px 0;transition:all 0.3s}
+
+/* PAGE HEADER */
+.page-header{
+  padding:140px 48px 60px;
+  text-align:center;
+  background:linear-gradient(160deg,var(--cream) 0%,var(--warm-white) 100%);
+  border-bottom:1px solid #f0d8d0;
+}
+.section-tag{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--deep-rose);margin-bottom:12px;display:block}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,60px);color:var(--text-dark);line-height:1.15;margin-bottom:16px}
+.page-title em{color:var(--deep-rose);font-style:italic}
+.page-sub{font-size:16px;color:var(--text-light);max-width:480px;margin:0 auto;line-height:1.8;font-weight:300}
+
+/* GALLERY */
+.gallery-section{padding:72px 48px 100px}
+.gallery-section .inner{max-width:1200px;margin:0 auto}
+.portfolio-grid{
+  columns:3;column-gap:16px;
+}
+.portfolio-grid .gallery-item{
+  break-inside:avoid;margin-bottom:16px;
+  border-radius:16px;overflow:hidden;
+  position:relative;cursor:pointer;
+}
+.portfolio-grid .gallery-item img{
+  width:100%;display:block;
+  transition:transform 0.4s;
+}
+.portfolio-grid .gallery-item:hover img{transform:scale(1.03)}
+.portfolio-grid .gallery-item .gallery-overlay{
+  position:absolute;inset:0;
+  background:rgba(46,26,26,0);
+  transition:background 0.3s;
+}
+.portfolio-grid .gallery-item:hover .gallery-overlay{
+  background:rgba(46,26,26,0.12);
+}
+
+/* Loading */
+.loading-msg{text-align:center;padding:60px;color:var(--text-light);font-size:15px;letter-spacing:1px}
+
+/* LIGHTBOX */
+.lightbox{
+  position:fixed;inset:0;background:rgba(20,8,8,0.92);
+  display:flex;align-items:center;justify-content:center;
+  z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.lightbox.active{opacity:1;pointer-events:all}
+.lightbox img{max-width:90vw;max-height:88vh;border-radius:8px;object-fit:contain}
+.lb-close{position:fixed;top:24px;right:32px;background:none;border:none;color:white;font-size:28px;cursor:pointer;z-index:1000}
+.lb-prev,.lb-next{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);border:none;color:white;font-size:40px;cursor:pointer;padding:12px 18px;border-radius:8px;transition:background 0.2s;z-index:1000}
+.lb-prev{left:16px}.lb-next{right:16px}
+.lb-prev:hover,.lb-next:hover{background:rgba(255,255,255,0.28)}
+
+/* FOOTER */
+footer{background:var(--text-dark);color:white;padding:48px 48px 28px;text-align:center}
+.footer-logo{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:12px}
+.footer-logo em{color:var(--rose);font-style:italic}
+footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
+.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.footer-links a{color:#d4a098;font-size:11px;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color 0.2s}
+.footer-links a:hover{color:white}
+.footer-bottom{border-top:1px solid #4a2f2f;padding-top:18px;font-size:12px;color:#6b4040}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-links{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:99}
+  .nav-links.open{display:flex}
+  .nav-toggle{display:block;position:relative;z-index:100}
+  .page-header{padding:110px 24px 48px}
+  .gallery-section{padding:48px 16px 72px}
+  .portfolio-grid{columns:2}
+}
+@media(max-width:480px){
+  .portfolio-grid{columns:1}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo"><em>Megha</em> — Makeup Artist</a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html#about">About</a>
+    <a href="index.html#services">Services</a>
+    <a href="work.html" class="active">Work</a>
+    <a href="index.html#reels">Reels</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://wa.me/917904417048" class="btn-book" target="_blank">Book Now</a>
+  </div>
+  <button class="nav-toggle" id="navToggle" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <span class="section-tag">✦ Portfolio</span>
+  <h1 class="page-title">The <em>Work</em></h1>
+  <p class="page-sub">Every look crafted with love, precision, and premium products — from bridal mornings to editorial shoots.</p>
+</div>
+
+<!-- GALLERY -->
+<section class="gallery-section">
+  <div class="inner">
+    <div class="portfolio-grid" id="portfolio-grid">
+      <div class="loading-msg">Loading portfolio…</div>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-prev" onclick="lbNav(-1);event.stopPropagation()">‹</button>
+  <img id="lbImg" src="" alt=""/>
+  <button class="lb-next" onclick="lbNav(1);event.stopPropagation()">›</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><em>Megha</em> — Makeup Artist</div>
+  <p>Chennai · Tamil Nadu · Available Pan India</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="work.html">Work</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://wa.me/917904417048" target="_blank">WhatsApp</a>
+  </div>
+  <div class="footer-bottom">&copy; <span id="footer-year"></span> Megha Makeup Artist. All rights reserved. · Chennai, Tamil Nadu</div>
+</footer>
+
+<script>
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+function toggleNav(){document.getElementById('navLinks').classList.toggle('open')}
+
+// Lightbox
+let lbImgs = [];
+let lbIdx = 0;
+function openLightbox(src){
+  lbIdx = lbImgs.indexOf(src);
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(e){
+  if(!e||e.target===document.getElementById('lightbox')||e.target.classList.contains('lb-close')){
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow='';
+  }
+}
+function lbNav(d){
+  lbIdx=(lbIdx+d+lbImgs.length)%lbImgs.length;
+  document.getElementById('lbImg').src=lbImgs[lbIdx];
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')lbNav(1);
+  if(e.key==='ArrowLeft')lbNav(-1);
+  if(e.key==='Escape')closeLightbox({target:document.getElementById('lightbox')});
+});
+
+// Cloudinary auto-pull
+const cloudName = 'dt4j8dfql';
+const fallbackImages = [
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435475/620225791_18059654906654429_840868549221104863_n._jnx9qt.webp',
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/620499424_18059654915654429_6182901230234784719_n._pedrrg.webp',
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/658145030_18066767213654429_4440616847551407209_n._elnzhw.webp',
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/642709919_18063461879654429_636483631102728729_n._rtwb60.jpg',
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/657682753_18066633629654429_9197724633762280152_n._hva7yo.webp',
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/655219771_18066767225654429_5608565933127328522_n._awx5ez.webp',
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/619607740_18059654897654429_4907201658254230149_n._cskvd5.webp',
+  'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/642709919_18063461879654429_636483631102728729_n._rtwb60.jpg'
+];
+
+function renderGallery(urls){
+  const grid = document.getElementById('portfolio-grid');
+  lbImgs = urls;
+  grid.innerHTML = '';
+  urls.forEach((url, i) => {
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.innerHTML = `<img src="${url}" alt="Portfolio look by Megha" loading="lazy"/><div class="gallery-overlay"></div>`;
+    item.onclick = () => openLightbox(url);
+    grid.appendChild(item);
+  });
+}
+
+async function fetchPortfolio(){
+  try {
+    const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/portfolio.json`);
+    const data = await res.json();
+    if(data.resources && data.resources.length > 0){
+      const urls = data.resources
+        .filter(a => !['mp4','mov','webm'].includes(a.format.toLowerCase()))
+        .map(a => `https://res.cloudinary.com/${cloudName}/image/upload/v${a.version}/${a.public_id}.${a.format}`);
+      renderGallery(urls.length > 0 ? urls : fallbackImages);
+    } else {
+      renderGallery(fallbackImages);
+    }
+  } catch(e) {
+    renderGallery(fallbackImages);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', fetchPortfolio);
+</script>
+</body>
+</html>

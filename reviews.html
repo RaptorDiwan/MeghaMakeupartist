@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reviews – Megha Makeup Artist | Chennai</title>
+<meta name="description" content="Client reviews and video testimonials for Megha, professional makeup artist in Chennai."/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blush:#f7d6d0;--rose:#e8a598;--deep-rose:#c4726a;
+  --cream:#fdf6f0;--warm-white:#fffaf7;
+  --text-dark:#2e1a1a;--text-mid:#6b3f3f;--text-light:#a07070;
+  --gold:#c9a96e;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--text-dark);overflow-x:hidden}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 48px;
+  background:rgba(253,246,240,0.94);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid #f0d8d0;
+}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--text-dark);text-decoration:none}
+.nav-logo em{color:var(--deep-rose);font-style:italic}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mid);text-decoration:none;transition:color 0.2s}
+.nav-links a:hover,.nav-links a.active{color:var(--deep-rose)}
+.btn-book{
+  background:var(--deep-rose);color:white!important;
+  padding:10px 24px;border-radius:30px;font-size:12px!important;
+  letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;
+  transition:all 0.2s;display:inline-block;
+}
+.btn-book:hover{background:#b5635b;transform:translateY(-1px)}
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--text-dark);margin:5px 0;transition:all 0.3s}
+
+/* PAGE HEADER */
+.page-header{
+  padding:140px 48px 60px;
+  text-align:center;
+  background:linear-gradient(160deg,var(--cream) 0%,var(--warm-white) 100%);
+  border-bottom:1px solid #f0d8d0;
+}
+.section-tag{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--deep-rose);margin-bottom:12px;display:block}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,60px);color:var(--text-dark);line-height:1.15;margin-bottom:16px}
+.page-title em{color:var(--deep-rose);font-style:italic}
+.page-sub{font-size:16px;color:var(--text-light);max-width:480px;margin:0 auto;line-height:1.8;font-weight:300}
+
+/* TEXT REVIEWS */
+.reviews-section{padding:80px 48px 60px;background:var(--warm-white)}
+.reviews-section .inner{max-width:1100px;margin:0 auto}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(28px,3.5vw,42px);color:var(--text-dark);margin-bottom:40px;text-align:center;line-height:1.2}
+.section-title em{color:var(--deep-rose);font-style:italic}
+.testi-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+}
+.testi-card{
+  background:var(--cream);border-radius:20px;
+  padding:32px;position:relative;
+  border:1px solid #f0d8d0;
+  transition:transform 0.3s,box-shadow 0.3s;
+}
+.testi-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(196,114,106,0.12)}
+.testi-card::before{
+  content:'"';font-family:'Playfair Display',serif;
+  font-size:64px;color:var(--rose);opacity:0.4;
+  position:absolute;top:12px;left:24px;line-height:1;
+}
+.testi-stars{color:var(--gold);font-size:14px;margin-bottom:14px;letter-spacing:2px}
+.testi-text{font-size:14px;color:var(--text-mid);line-height:1.8;font-style:italic;margin-bottom:20px}
+.testi-name{font-weight:600;font-size:14px;color:var(--text-dark)}
+.testi-role{font-size:11px;letter-spacing:1px;color:var(--text-light);text-transform:uppercase;margin-top:3px}
+
+/* VIDEO TESTIMONIALS */
+.video-section{padding:60px 48px 100px;background:var(--cream)}
+.video-section .inner{max-width:1100px;margin:0 auto}
+.video-section .section-title{margin-bottom:40px}
+.video-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+}
+.video-card{
+  border-radius:20px;overflow:hidden;
+  position:relative;aspect-ratio:9/16;background:#2e1a1a;
+  cursor:pointer;
+}
+.video-card video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 0.4s;
+}
+.video-card:hover video{transform:scale(1.04)}
+.video-play{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(46,26,26,0.35);transition:background 0.2s;
+}
+.video-card:hover .video-play{background:rgba(46,26,26,0.1)}
+.play-btn{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,255,255,0.9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;transition:transform 0.2s;
+}
+.video-card:hover .play-btn{transform:scale(1.1)}
+.no-videos{text-align:center;padding:48px;color:var(--text-light);font-size:15px;grid-column:1/-1}
+
+/* FOOTER */
+footer{background:var(--text-dark);color:white;padding:48px 48px 28px;text-align:center}
+.footer-logo{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:12px}
+.footer-logo em{color:var(--rose);font-style:italic}
+footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
+.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.footer-links a{color:#d4a098;font-size:11px;letter-spacing:1px;text-decoration:none;text-transform:uppercase;transition:color 0.2s}
+.footer-links a:hover{color:white}
+.footer-bottom{border-top:1px solid #4a2f2f;padding-top:18px;font-size:12px;color:#6b4040}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-links{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--cream);flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:99}
+  .nav-links.open{display:flex}
+  .nav-toggle{display:block;position:relative;z-index:100}
+  .page-header{padding:110px 24px 48px}
+  .reviews-section,.video-section{padding:48px 20px 60px}
+  .testi-grid,.video-grid{grid-template-columns:1fr}
+}
+@media(max-width:1024px){
+  .testi-grid{grid-template-columns:repeat(2,1fr)}
+  .video-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo"><em>Megha</em> — Makeup Artist</a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html#about">About</a>
+    <a href="index.html#services">Services</a>
+    <a href="work.html">Work</a>
+    <a href="index.html#reels">Reels</a>
+    <a href="reviews.html" class="active">Reviews</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://wa.me/917904417048" class="btn-book" target="_blank">Book Now</a>
+  </div>
+  <button class="nav-toggle" id="navToggle" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <span class="section-tag">✦ Love from Clients</span>
+  <h1 class="page-title">What They <em>Say</em></h1>
+  <p class="page-sub">Real words from real brides, clients and collaborators — their experience means everything.</p>
+</div>
+
+<!-- TEXT REVIEWS -->
+<section class="reviews-section">
+  <div class="inner">
+    <h2 class="section-title">Written <em>Reviews</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">Megha made me feel like a queen on my wedding day. The look lasted all day and I couldn't stop getting compliments. Absolutely magical!</p><div class="testi-name">Shruthi R.</div><div class="testi-role">Bride · Chennai</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">I've worked with many artists but Megha is in a different league. She understands your face and brings out the absolute best in you.</p><div class="testi-name">Anitha K.</div><div class="testi-role">Celebrity Client</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">Booked her for my sister's reception — the entire family was blown away. So professional, so warm, and the results speak for themselves!</p><div class="testi-name">Archana M.</div><div class="testi-role">Function Makeup · Coimbatore</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">Megha travelled all the way to Madurai for my wedding and I'm so grateful. The bridal look was exactly what I dreamed of. 10/10!</p><div class="testi-name">Thulasi S.</div><div class="testi-role">Bride · Madurai</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">She did my shoot makeup and the photos came out stunning. Such a creative eye and she knows exactly how makeup translates on camera!</p><div class="testi-name">Nandhini P.</div><div class="testi-role">Editorial Shoot · Chennai</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">My skin was glowing even underneath the makeup — she truly cares about skin health first. The look held beautifully through a 6-hour function!</p><div class="testi-name">Priya V.</div><div class="testi-role">Engagement · Salem</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">I was nervous about a bold look for my party, but Megha guided me through it and I felt so confident. She's not just an artist, she's a mood lifter!</p><div class="testi-name">Divya L.</div><div class="testi-role">Party Glam · Chennai</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">Professional, punctual, and simply brilliant. She used only top-quality products and even gave me skincare tips afterwards. Truly one of a kind.</p><div class="testi-name">Kavitha N.</div><div class="testi-role">Bridal Makeup · Trichy</div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">We hired Megha for a full celebrity event and she handled everything so gracefully. Flawless results for multiple looks in one day — superhero!</p><div class="testi-name">Sangeetha R.</div><div class="testi-role">Event Organiser · Chennai</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO TESTIMONIALS -->
+<section class="video-section">
+  <div class="inner">
+    <h2 class="section-title">Video <em>Testimonials</em></h2>
+    <div class="video-grid" id="video-grid">
+      <div class="no-videos">Loading video testimonials…</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><em>Megha</em> — Makeup Artist</div>
+  <p>Makeup Artist · Chennai · Tamil Nadu</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="work.html">Work</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://wa.me/917904417048" target="_blank">WhatsApp</a>
+  </div>
+  <div class="footer-bottom">&copy; <span id="footer-year"></span> Megha Makeup Artist. All rights reserved. · Chennai, Tamil Nadu</div>
+</footer>
+
+<script>
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+function toggleNav(){document.getElementById('navLinks').classList.toggle('open')}
+
+function toggleVideo(card){
+  const vid = card.querySelector('video');
+  const overlay = card.querySelector('.video-play');
+  if(vid.paused){
+    document.querySelectorAll('.video-card video').forEach(v=>{
+      v.pause();
+      v.closest('.video-card').querySelector('.video-play').style.opacity='1';
+    });
+    vid.play();overlay.style.opacity='0';
+  } else {
+    vid.pause();overlay.style.opacity='1';
+  }
+}
+
+async function fetchVideoTestimonials(){
+  const grid = document.getElementById('video-grid');
+  try {
+    const res = await fetch('https://res.cloudinary.com/dt4j8dfql/image/list/reviews.json');
+    const data = await res.json();
+    const videos = (data.resources||[]).filter(a=>['mp4','mov','webm'].includes(a.format.toLowerCase()));
+    if(videos.length > 0){
+      grid.innerHTML='';
+      videos.forEach(asset=>{
+        const url=`https://res.cloudinary.com/dt4j8dfql/video/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
+        const card=document.createElement('div');
+        card.className='video-card';
+        card.onclick=()=>toggleVideo(card);
+        card.innerHTML=`<video src="${url}" loop playsinline preload="metadata"></video><div class="video-play"><div class="play-btn">▶</div></div>`;
+        grid.appendChild(card);
+      });
+    } else {
+      grid.innerHTML='<div class="no-videos">Video testimonials coming soon! 🌸</div>';
+    }
+  } catch(e){
+    grid.innerHTML='<div class="no-videos">Video testimonials coming soon! 🌸</div>';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', fetchVideoTestimonials);
+</script>
+</body>
+</html>
