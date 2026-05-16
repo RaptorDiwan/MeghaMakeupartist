@@ -53,30 +53,125 @@ nav{
 .page-title em{color:var(--deep-rose);font-style:italic}
 .page-sub{font-size:16px;color:var(--text-light);max-width:480px;margin:0 auto;line-height:1.8;font-weight:300}
 
+/* TABS */
+.media-tabs{
+  display:flex;justify-content:center;
+  padding:0 48px 0;
+  margin-bottom:48px;
+}
+.tab-pills{
+  display:inline-flex;
+  background:var(--cream);
+  border:1px solid #f0d8d0;
+  border-radius:40px;
+  padding:5px;
+  gap:4px;
+}
+.tab-pill{
+  padding:11px 36px;
+  border-radius:34px;
+  border:none;
+  background:transparent;
+  font-family:'Jost',sans-serif;
+  font-size:12px;letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--text-light);
+  cursor:pointer;
+  transition:all 0.25s;
+  display:flex;align-items:center;gap:8px;
+  font-weight:500;
+}
+.tab-pill.active{
+  background:var(--deep-rose);
+  color:white;
+  box-shadow:0 4px 16px rgba(196,114,106,0.35);
+}
+.tab-pill:not(.active):hover{color:var(--deep-rose);background:#fce8e6}
+.tab-pill svg{opacity:0.75}
+.tab-pill.active svg{opacity:1}
+
 /* GALLERY */
-.gallery-section{padding:72px 48px 100px}
-.gallery-section .inner{max-width:1200px;margin:0 auto}
+.gallery-section{padding:0 48px 100px}
+.gallery-section .inner{max-width:1240px;margin:0 auto}
 .portfolio-grid{
-  columns:3;column-gap:16px;
+  columns:3;column-gap:14px;
 }
 .portfolio-grid .gallery-item{
-  break-inside:avoid;margin-bottom:16px;
+  break-inside:avoid;margin-bottom:14px;
   border-radius:16px;overflow:hidden;
   position:relative;cursor:pointer;
+  background:var(--cream);
 }
 .portfolio-grid .gallery-item img{
   width:100%;display:block;
-  transition:transform 0.4s;
+  transition:transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94);
 }
-.portfolio-grid .gallery-item:hover img{transform:scale(1.03)}
+.portfolio-grid .gallery-item:hover img{transform:scale(1.04)}
 .portfolio-grid .gallery-item .gallery-overlay{
   position:absolute;inset:0;
   background:rgba(46,26,26,0);
   transition:background 0.3s;
+  display:flex;align-items:center;justify-content:center;
 }
 .portfolio-grid .gallery-item:hover .gallery-overlay{
-  background:rgba(46,26,26,0.12);
+  background:rgba(46,26,26,0.15);
 }
+.overlay-icon{
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,0.9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  opacity:0;transform:scale(0.7);
+  transition:all 0.25s;
+}
+.portfolio-grid .gallery-item:hover .overlay-icon{opacity:1;transform:scale(1)}
+
+/* VIDEO GRID */
+.video-grid-masonry{
+  columns:3;column-gap:14px;
+}
+.video-grid-masonry .video-item{
+  break-inside:avoid;margin-bottom:14px;
+  border-radius:16px;overflow:hidden;
+  position:relative;cursor:pointer;
+  background:#2e1a1a;
+  aspect-ratio:9/16;
+}
+.video-grid-masonry .video-item video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 0.4s;
+}
+.video-grid-masonry .video-item:hover video{transform:scale(1.04)}
+.video-play-overlay{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(46,26,26,0.35);transition:background 0.25s;
+}
+.video-item:hover .video-play-overlay{background:rgba(46,26,26,0.1)}
+.play-circle{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,255,255,0.92);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;transition:transform 0.2s;
+}
+.video-item:hover .play-circle{transform:scale(1.1)}
+
+/* INFINITE SCROLL */
+.load-more-sentinel{height:60px;display:flex;align-items:center;justify-content:center;margin-top:12px}
+.loader-dots{display:none;gap:6px}
+.loader-dots span{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--rose);
+  animation:dotPulse 1.2s ease-in-out infinite;
+}
+.loader-dots span:nth-child(2){animation-delay:0.2s}
+.loader-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes dotPulse{0%,80%,100%{transform:scale(0.8);opacity:0.5}40%{transform:scale(1.2);opacity:1}}
+.loader-dots.active{display:flex}
+.end-msg{text-align:center;padding:24px;color:var(--text-light);font-size:13px;letter-spacing:1px;display:none}
+.end-msg.show{display:block}
+
+/* Panel visibility */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
 /* Loading */
 .loading-msg{text-align:center;padding:60px;color:var(--text-light);font-size:15px;letter-spacing:1px}
@@ -111,11 +206,15 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
   .nav-links.open{display:flex}
   .nav-toggle{display:block;position:relative;z-index:100}
   .page-header{padding:110px 24px 48px}
-  .gallery-section{padding:48px 16px 72px}
+  .media-tabs{padding:0 16px;margin-bottom:28px}
+  .tab-pill{padding:10px 24px;font-size:11px}
+  .gallery-section{padding:0 12px 60px}
   .portfolio-grid{columns:2}
+  .video-grid-masonry{columns:2}
 }
-@media(max-width:480px){
+@media(max-width:400px){
   .portfolio-grid{columns:1}
+  .video-grid-masonry{columns:1}
 }
 </style>
 </head>
@@ -145,12 +244,46 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
   <p class="page-sub">Every look crafted with love, precision, and premium products — from bridal mornings to editorial shoots.</p>
 </div>
 
+<!-- TABS -->
+<div class="media-tabs">
+  <div class="tab-pills">
+    <button class="tab-pill active" id="tab-images" onclick="switchTab('images')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Images
+    </button>
+    <button class="tab-pill" id="tab-videos" onclick="switchTab('videos')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      Videos
+    </button>
+  </div>
+</div>
+
 <!-- GALLERY -->
 <section class="gallery-section">
   <div class="inner">
-    <div class="portfolio-grid" id="portfolio-grid">
-      <div class="loading-msg">Loading portfolio…</div>
+
+    <!-- IMAGES PANEL -->
+    <div class="tab-panel active" id="panel-images">
+      <div class="portfolio-grid" id="portfolio-grid">
+        <div class="loading-msg">Loading portfolio…</div>
+      </div>
+      <div class="load-more-sentinel" id="img-sentinel">
+        <div class="loader-dots" id="img-loader"><span></span><span></span><span></span></div>
+      </div>
+      <div class="end-msg" id="img-end">✦ All looks loaded</div>
     </div>
+
+    <!-- VIDEOS PANEL -->
+    <div class="tab-panel" id="panel-videos">
+      <div class="video-grid-masonry" id="video-grid">
+        <div class="loading-msg">Loading videos…</div>
+      </div>
+      <div class="load-more-sentinel" id="vid-sentinel">
+        <div class="loader-dots" id="vid-loader"><span></span><span></span><span></span></div>
+      </div>
+      <div class="end-msg" id="vid-end">✦ All videos loaded</div>
+    </div>
+
   </div>
 </section>
 
@@ -178,15 +311,21 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
 
 <script>
 document.getElementById('footer-year').textContent = new Date().getFullYear();
-
 function toggleNav(){document.getElementById('navLinks').classList.toggle('open')}
 
-// Lightbox
-let lbImgs = [];
-let lbIdx = 0;
+// ── TAB SWITCH ──────────────────────────────────────────────
+function switchTab(tab){
+  document.querySelectorAll('.tab-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+// ── LIGHTBOX ────────────────────────────────────────────────
+let lbImgs=[];let lbIdx=0;
 function openLightbox(src){
-  lbIdx = lbImgs.indexOf(src);
-  document.getElementById('lbImg').src = src;
+  lbIdx=lbImgs.indexOf(src);
+  document.getElementById('lbImg').src=src;
   document.getElementById('lightbox').classList.add('active');
   document.body.style.overflow='hidden';
 }
@@ -206,9 +345,14 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape')closeLightbox({target:document.getElementById('lightbox')});
 });
 
-// Cloudinary auto-pull
-const cloudName = 'dt4j8dfql';
-const fallbackImages = [
+// ── IMAGES – INFINITE SCROLL ────────────────────────────────
+const BATCH = 15;
+let allImages=[];
+let imgLoaded=0;
+let imgDone=false;
+let imgObserver=null;
+
+const fallbackImages=[
   'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435475/620225791_18059654906654429_840868549221104863_n._jnx9qt.webp',
   'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/620499424_18059654915654429_6182901230234784719_n._pedrrg.webp',
   'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/658145030_18066767213654429_4440616847551407209_n._elnzhw.webp',
@@ -219,37 +363,108 @@ const fallbackImages = [
   'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/642709919_18063461879654429_636483631102728729_n._rtwb60.jpg'
 ];
 
-function renderGallery(urls){
-  const grid = document.getElementById('portfolio-grid');
-  lbImgs = urls;
-  grid.innerHTML = '';
-  urls.forEach((url, i) => {
-    const item = document.createElement('div');
-    item.className = 'gallery-item';
-    item.innerHTML = `<img src="${url}" alt="Portfolio look by Megha" loading="lazy"/><div class="gallery-overlay"></div>`;
-    item.onclick = () => openLightbox(url);
+function renderNextBatch(){
+  if(imgDone) return;
+  const grid=document.getElementById('portfolio-grid');
+  const batch=allImages.slice(imgLoaded, imgLoaded+BATCH);
+  if(batch.length===0){
+    imgDone=true;
+    document.getElementById('img-loader').classList.remove('active');
+    document.getElementById('img-end').classList.add('show');
+    return;
+  }
+  batch.forEach(url=>{
+    const item=document.createElement('div');
+    item.className='gallery-item';
+    item.innerHTML=`<img src="${url}" alt="Portfolio look by Megha" loading="lazy"/><div class="gallery-overlay"><div class="overlay-icon">🔍</div></div>`;
+    item.onclick=()=>openLightbox(url);
     grid.appendChild(item);
   });
-}
-
-async function fetchPortfolio(){
-  try {
-    const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/portfolio.json`);
-    const data = await res.json();
-    if(data.resources && data.resources.length > 0){
-      const urls = data.resources
-        .filter(a => !['mp4','mov','webm'].includes(a.format.toLowerCase()))
-        .map(a => `https://res.cloudinary.com/${cloudName}/image/upload/v${a.version}/${a.public_id}.${a.format}`);
-      renderGallery(urls.length > 0 ? urls : fallbackImages);
-    } else {
-      renderGallery(fallbackImages);
-    }
-  } catch(e) {
-    renderGallery(fallbackImages);
+  imgLoaded+=batch.length;
+  if(imgLoaded>=allImages.length){
+    imgDone=true;
+    document.getElementById('img-loader').classList.remove('active');
+    document.getElementById('img-end').classList.add('show');
   }
 }
 
-window.addEventListener('DOMContentLoaded', fetchPortfolio);
+function initImageInfiniteScroll(urls){
+  allImages=urls;
+  lbImgs=urls;
+  const grid=document.getElementById('portfolio-grid');
+  grid.innerHTML='';
+  renderNextBatch();
+
+  const sentinel=document.getElementById('img-sentinel');
+  const loader=document.getElementById('img-loader');
+  imgObserver=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting && !imgDone){
+      loader.classList.add('active');
+      setTimeout(()=>{
+        renderNextBatch();
+        loader.classList.remove('active');
+      },400);
+    }
+  },{rootMargin:'200px'});
+  imgObserver.observe(sentinel);
+}
+
+async function fetchPortfolio(){
+  try{
+    const res=await fetch('https://res.cloudinary.com/dt4j8dfql/image/list/work.json');
+    const data=await res.json();
+    const urls=(data.resources||[])
+      .filter(a=>!['mp4','mov','webm'].includes(a.format.toLowerCase()))
+      .map(a=>`https://res.cloudinary.com/dt4j8dfql/image/upload/v${a.version}/${a.public_id}.${a.format}`);
+    initImageInfiniteScroll(urls.length>0?urls:fallbackImages);
+  }catch(e){
+    initImageInfiniteScroll(fallbackImages);
+  }
+}
+
+// ── VIDEOS ──────────────────────────────────────────────────
+function toggleVideo(card){
+  const vid=card.querySelector('video');
+  const overlay=card.querySelector('.video-play-overlay');
+  if(vid.paused){
+    document.querySelectorAll('.video-item video').forEach(v=>{
+      v.pause();
+      v.closest('.video-item').querySelector('.video-play-overlay').style.opacity='1';
+    });
+    vid.play();overlay.style.opacity='0';
+  }else{
+    vid.pause();overlay.style.opacity='1';
+  }
+}
+
+async function fetchVideos(){
+  const grid=document.getElementById('video-grid');
+  try{
+    const res=await fetch('https://res.cloudinary.com/dt4j8dfql/video/list/work.json');
+    const data=await res.json();
+    if(data.resources&&data.resources.length>0){
+      grid.innerHTML='';
+      data.resources.forEach(asset=>{
+        const url=`https://res.cloudinary.com/dt4j8dfql/video/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
+        const item=document.createElement('div');
+        item.className='video-item';
+        item.onclick=()=>toggleVideo(item);
+        item.innerHTML=`<video src="${url}" loop playsinline preload="metadata"></video><div class="video-play-overlay"><div class="play-circle">▶</div></div>`;
+        grid.appendChild(item);
+      });
+      document.getElementById('vid-end').classList.add('show');
+    }else{
+      grid.innerHTML='<div class="loading-msg">Videos coming soon! 🌸</div>';
+    }
+  }catch(e){
+    grid.innerHTML='<div class="loading-msg">Videos coming soon! 🌸</div>';
+  }
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  fetchPortfolio();
+  fetchVideos();
+});
 </script>
 </body>
 </html>
