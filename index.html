@@ -6,6 +6,7 @@
 <title>Megha – Makeup Artist | Chennai</title>
 <meta name="description" content="Megha is a professional makeup artist based in Chennai, Tamil Nadu. Specialising in bridal, function, celebrity and editorial makeup. 500+ happy clients."/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -687,7 +688,7 @@ footer>p{font-size:14px;color:#a07070;margin-bottom:28px}
   <button class="lb-prev" onclick="lbNav(-1);event.stopPropagation()">‹</button>
   <img id="lbImg" src="" alt="" onclick="toggleZoom(event)" onmousemove="lbPanZoom(event)"/>
   <button class="lb-next" onclick="lbNav(1);event.stopPropagation()">›</button>
-  <div class="lb-zoom-hint" id="lbZoomHint">🔍 Click image to zoom in</div>
+  <div class="lb-zoom-hint" id="lbZoomHint">🔍 Tap to zoom · Swipe to browse</div>
 </div>
 
 <script>
@@ -751,6 +752,22 @@ function resetZoom(){
   document.getElementById('lbZoomHint').classList.remove('hide');
 }
 
+// Swipe to browse (mobile)
+let lbTouchX=0,lbTouchY=0;
+const lbEl=document.getElementById('lightbox');
+lbEl.addEventListener('touchstart',e=>{
+  lbTouchX=e.changedTouches[0].clientX;
+  lbTouchY=e.changedTouches[0].clientY;
+},{passive:true});
+lbEl.addEventListener('touchend',e=>{
+  if(document.getElementById('lbImg').classList.contains('zoomed'))return;
+  const dx=e.changedTouches[0].clientX-lbTouchX;
+  const dy=e.changedTouches[0].clientY-lbTouchY;
+  if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+    lbNav(dx<0?1:-1);
+  }
+},{passive:true});
+
 // Footer year
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 
@@ -786,11 +803,46 @@ function sendWhatsApp(){
 <script>
   const cloudName = 'dt4j8dfql';
 
-  // Build a web-safe (h264/aac mp4) src + a real poster thumbnail
-  // from either a Cloudinary list-API resource {public_id, version}
+  // Supabase (read-only here: order / visibility / custom thumbnails set via admin panel)
+  const SUPABASE_URL='https://bklesvxiawdqabwlmkni.supabase.co';
+  const SUPABASE_KEY='sb_publishable_zOrrKM1d13aQoMBSlL9bng_r5_Wx8lW';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+  // Merge Cloudinary assets with admin-managed ordering/visibility/thumbnails.
+  // assets: array of {public_id, version, format, resource_type, created_at}
+  // defaultPublished: whether an asset with no admin record yet should show by default
+  async function applyMediaItems(category,assets,defaultPublished){
+    let rows=[];
+    try{
+      const {data}=await sb.from('media_items').select('*').eq('category',category);
+      rows=data||[];
+    }catch(e){ rows=[]; }
+
+    const rowMap={};
+    rows.forEach(r=>{ rowMap[r.cloudinary_public_id]=r; });
+
+    const merged=assets.map(a=>{
+      const row=rowMap[a.public_id];
+      return Object.assign({},a,{
+        custom_thumbnail: row?row.custom_thumbnail:null,
+        published: row?row.published:defaultPublished,
+        sort_order: (row&&row.sort_order!==null&&row.sort_order!==undefined)?row.sort_order:Number.MAX_SAFE_INTEGER
+      });
+    }).filter(a=>a.published);
+
+    merged.sort((x,y)=>{
+      if(x.sort_order!==y.sort_order) return x.sort_order-y.sort_order;
+      return new Date(y.created_at||0)-new Date(x.created_at||0);
+    });
+
+    return merged;
+  }
+
+  // Build a web-safe (h264/aac mp4) src + a poster thumbnail
+  // from either a Cloudinary list-API resource {public_id, version, custom_thumbnail}
   // or a raw cloudinary delivery URL string.
   function cldVideo(asset){
-    let publicId, version;
+    let publicId, version, customThumb=null;
     if(typeof asset==='string'){
       const m=asset.match(/\/upload\/(?:v(\d+)\/)?(.+)\.\w+$/);
       version=m?m[1]:null;
@@ -798,11 +850,12 @@ function sendWhatsApp(){
     }else{
       publicId=asset.public_id;
       version=asset.version;
+      customThumb=asset.custom_thumbnail||null;
     }
     const v=version?`v${version}/`:'';
     return{
       src:`https://res.cloudinary.com/${cloudName}/video/upload/f_mp4,vc_h264,ac_aac,q_auto/${v}${publicId}.mp4`,
-      poster:`https://res.cloudinary.com/${cloudName}/video/upload/so_0,q_auto,w_500/${v}${publicId}.jpg`
+      poster:customThumb||`https://res.cloudinary.com/${cloudName}/video/upload/so_0,q_auto,w_500/${v}${publicId}.jpg`
     };
   }
 
@@ -856,7 +909,9 @@ function sendWhatsApp(){
       const res = await fetch(`https://res.cloudinary.com/${cloudName}/video/list/portfolio.json`);
       const data = await res.json();
       if (data.resources && data.resources.length > 0) {
-        renderVideos(data.resources);
+        const assets=data.resources.map(a=>({public_id:a.public_id,version:a.version,format:a.format,resource_type:'video',created_at:a.created_at}));
+        const merged=await applyMediaItems('reel',assets,true);
+        renderVideos(merged.length>0?merged:fallbackVideos);
       } else {
         renderVideos(fallbackVideos);
       }

@@ -6,6 +6,7 @@
 <title>Work – Megha Makeup Artist | Chennai</title>
 <meta name="description" content="Portfolio of Megha, professional makeup artist in Chennai. Bridal, function, editorial and celebrity makeup looks."/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -274,6 +275,7 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
   .nav-toggle{display:block;position:relative;z-index:100}
   .page-header{padding:110px 24px 48px}
   .media-tabs{padding:0 16px;margin-bottom:28px}
+  .tab-pills{flex-wrap:wrap;justify-content:center;max-width:100%}
   .tab-pill{padding:10px 24px;font-size:11px}
   .gallery-section{padding:0 12px 60px}
   .portfolio-grid{columns:2}
@@ -284,6 +286,7 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
   .portfolio-grid{columns:1}
   .video-grid-masonry{columns:1}
   .hairstyle-grid-masonry{columns:1}
+  .tab-pill{padding:9px 18px;font-size:10px}
 }
 </style>
 </head>
@@ -377,7 +380,7 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
   <button class="lb-prev" onclick="lbNav(-1);event.stopPropagation()">‹</button>
   <img id="lbImg" src="" alt="" onclick="toggleZoom(event)" onmousemove="lbPanZoom(event)"/>
   <button class="lb-next" onclick="lbNav(1);event.stopPropagation()">›</button>
-  <div class="lb-zoom-hint" id="lbZoomHint">🔍 Click image to zoom in</div>
+  <div class="lb-zoom-hint" id="lbZoomHint">🔍 Tap to zoom · Swipe to browse</div>
 </div>
 
 <!-- FOOTER -->
@@ -467,6 +470,22 @@ function resetZoom(){
   document.getElementById('lbZoomHint').classList.remove('hide');
 }
 
+// Swipe to browse (mobile)
+let lbTouchX=0,lbTouchY=0;
+const lbEl=document.getElementById('lightbox');
+lbEl.addEventListener('touchstart',e=>{
+  lbTouchX=e.changedTouches[0].clientX;
+  lbTouchY=e.changedTouches[0].clientY;
+},{passive:true});
+lbEl.addEventListener('touchend',e=>{
+  if(document.getElementById('lbImg').classList.contains('zoomed'))return;
+  const dx=e.changedTouches[0].clientX-lbTouchX;
+  const dy=e.changedTouches[0].clientY-lbTouchY;
+  if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){
+    lbNav(dx<0?1:-1);
+  }
+},{passive:true});
+
 // ── IMAGES – INFINITE SCROLL ────────────────────────────────
 const BATCH = 15;
 let allImages=[];
@@ -535,9 +554,11 @@ async function fetchPortfolio(){
   try{
     const res=await fetch('https://res.cloudinary.com/dt4j8dfql/image/list/work.json');
     const data=await res.json();
-    const urls=(data.resources||[])
+    const assets=(data.resources||[])
       .filter(a=>!['mp4','mov','webm'].includes(a.format.toLowerCase()))
-      .map(a=>`https://res.cloudinary.com/dt4j8dfql/image/upload/v${a.version}/${a.public_id}.${a.format}`);
+      .map(a=>({public_id:a.public_id,version:a.version,format:a.format,resource_type:'image',created_at:a.created_at}));
+    const merged=await applyMediaItems('portfolio',assets,true);
+    const urls=merged.map(a=>`https://res.cloudinary.com/dt4j8dfql/image/upload/v${a.version}/${a.public_id}.${a.format}`);
     initImageInfiniteScroll(urls.length>0?urls:fallbackImages);
   }catch(e){
     initImageInfiniteScroll(fallbackImages);
@@ -547,11 +568,46 @@ async function fetchPortfolio(){
 // ── VIDEOS ──────────────────────────────────────────────────
 const cloudName='dt4j8dfql';
 
-// Build a web-safe (h264/aac mp4) src + a real poster thumbnail
-// from either a Cloudinary list-API resource {public_id, version}
+// Supabase (read-only here: order / visibility / custom thumbnails set via admin panel)
+const SUPABASE_URL='https://bklesvxiawdqabwlmkni.supabase.co';
+const SUPABASE_KEY='sb_publishable_zOrrKM1d13aQoMBSlL9bng_r5_Wx8lW';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// Merge Cloudinary assets with admin-managed ordering/visibility/thumbnails.
+// assets: array of {public_id, version, format, resource_type, created_at}
+// defaultPublished: whether an asset with no admin record yet should show by default
+async function applyMediaItems(category,assets,defaultPublished){
+  let rows=[];
+  try{
+    const {data}=await sb.from('media_items').select('*').eq('category',category);
+    rows=data||[];
+  }catch(e){ rows=[]; }
+
+  const rowMap={};
+  rows.forEach(r=>{ rowMap[r.cloudinary_public_id]=r; });
+
+  const merged=assets.map(a=>{
+    const row=rowMap[a.public_id];
+    return Object.assign({},a,{
+      custom_thumbnail: row?row.custom_thumbnail:null,
+      published: row?row.published:defaultPublished,
+      sort_order: (row&&row.sort_order!==null&&row.sort_order!==undefined)?row.sort_order:Number.MAX_SAFE_INTEGER
+    });
+  }).filter(a=>a.published);
+
+  merged.sort((x,y)=>{
+    if(x.sort_order!==y.sort_order) return x.sort_order-y.sort_order;
+    return new Date(y.created_at||0)-new Date(x.created_at||0);
+  });
+
+  return merged;
+}
+
+// Build a web-safe (h264/aac mp4) src + a poster thumbnail
+// from either a Cloudinary list-API resource {public_id, version, custom_thumbnail}
 // or a raw cloudinary delivery URL string.
 function cldVideo(asset){
-  let publicId, version;
+  let publicId, version, customThumb=null;
   if(typeof asset==='string'){
     const m=asset.match(/\/upload\/(?:v(\d+)\/)?(.+)\.\w+$/);
     version=m?m[1]:null;
@@ -559,11 +615,12 @@ function cldVideo(asset){
   }else{
     publicId=asset.public_id;
     version=asset.version;
+    customThumb=asset.custom_thumbnail||null;
   }
   const v=version?`v${version}/`:'';
   return{
     src:`https://res.cloudinary.com/${cloudName}/video/upload/f_mp4,vc_h264,ac_aac,q_auto/${v}${publicId}.mp4`,
-    poster:`https://res.cloudinary.com/${cloudName}/video/upload/so_0,q_auto,w_500/${v}${publicId}.jpg`
+    poster:customThumb||`https://res.cloudinary.com/${cloudName}/video/upload/so_0,q_auto,w_500/${v}${publicId}.jpg`
   };
 }
 
@@ -586,9 +643,11 @@ async function fetchVideos(){
   try{
     const res=await fetch(`https://res.cloudinary.com/${cloudName}/video/list/work.json`);
     const data=await res.json();
-    if(data.resources&&data.resources.length>0){
+    const assets=(data.resources||[]).map(a=>({public_id:a.public_id,version:a.version,format:a.format,resource_type:'video',created_at:a.created_at}));
+    const merged=await applyMediaItems('videos',assets,true);
+    if(merged.length>0){
       grid.innerHTML='';
-      data.resources.forEach(asset=>{
+      merged.forEach(asset=>{
         const {src,poster}=cldVideo(asset);
         const item=document.createElement('div');
         item.className='video-item';
@@ -625,12 +684,13 @@ function renderHairstyleBatch(){
   }
   batch.forEach(entry=>{
     const item=document.createElement('div');
-    if(entry.type==='image'){
+    if(entry.resource_type==='image'){
+      const url=`https://res.cloudinary.com/${cloudName}/image/upload/v${entry.version}/${entry.public_id}.${entry.format}`;
       item.className='gallery-item';
-      item.innerHTML=`<img src="${entry.url}" alt="Hairstyle look by Megha" loading="lazy"/><div class="gallery-overlay"><div class="overlay-icon">🔍</div></div>`;
-      item.onclick=()=>openLightboxFrom(hairstyleImages,entry.url);
+      item.innerHTML=`<img src="${url}" alt="Hairstyle look by Megha" loading="lazy"/><div class="gallery-overlay"><div class="overlay-icon">🔍</div></div>`;
+      item.onclick=()=>openLightboxFrom(hairstyleImages,url);
     }else{
-      const {src,poster}=cldVideo(entry.asset);
+      const {src,poster}=cldVideo(entry);
       item.className='video-item';
       item.onclick=()=>toggleVideo(item);
       item.innerHTML=`<video src="${src}" poster="${poster}" loop playsinline preload="metadata" onerror="this.closest('.video-item').classList.add('video-error')"></video><div class="video-play-overlay"><div class="play-circle">▶</div></div><div class="video-error-msg">⚠ Video unavailable</div>`;
@@ -647,7 +707,7 @@ function renderHairstyleBatch(){
 
 function initHairstyleInfiniteScroll(items){
   allHairstyle=items;
-  hairstyleImages=items.filter(e=>e.type==='image').map(e=>e.url);
+  hairstyleImages=items.filter(e=>e.resource_type==='image').map(e=>`https://res.cloudinary.com/${cloudName}/image/upload/v${e.version}/${e.public_id}.${e.format}`);
   const grid=document.getElementById('hairstyle-grid');
   grid.innerHTML='';
 
@@ -680,11 +740,12 @@ async function fetchHairstyle(){
     ]);
     const images=(imgData.resources||[])
       .filter(a=>!['mp4','mov','webm'].includes((a.format||'').toLowerCase()))
-      .map(a=>({type:'image',url:`https://res.cloudinary.com/${cloudName}/image/upload/v${a.version}/${a.public_id}.${a.format}`,created:a.created_at}));
+      .map(a=>({public_id:a.public_id,version:a.version,format:a.format,resource_type:'image',created_at:a.created_at}));
     const videos=(vidData.resources||[])
-      .map(a=>({type:'video',asset:a,created:a.created_at}));
-    const combined=[...images,...videos].sort((a,b)=>new Date(b.created)-new Date(a.created));
-    initHairstyleInfiniteScroll(combined);
+      .map(a=>({public_id:a.public_id,version:a.version,format:a.format,resource_type:'video',created_at:a.created_at}));
+    const combined=[...images,...videos];
+    const merged=await applyMediaItems('hairstyle',combined,true);
+    initHairstyleInfiniteScroll(merged);
   }catch(e){
     initHairstyleInfiniteScroll([]);
   }
