@@ -88,6 +88,19 @@ h1,h2,h3{font-family:'Playfair Display',serif}
   transition:background 0.2s;
 }
 .save-btn:hover{background:var(--text-mid)}
+.upload-btn-label{
+  background:transparent;border:1px solid var(--deep-rose);color:var(--deep-rose);border-radius:30px;padding:9px 24px;
+  font-family:'Jost',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;
+}
+.upload-btn-label:hover{background:var(--blush)}
+.upload-progress{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.upload-row{
+  font-size:12px;letter-spacing:0.5px;color:var(--text-mid);
+  background:var(--blush);border-radius:8px;padding:8px 14px;
+}
+.upload-row.upload-done{background:#e3efe3;color:#3d6b3d}
+.upload-row.upload-error{background:#f6dcda;color:#a3413c}
 .saved-flag{font-size:12px;color:#5a8c5a;opacity:0;transition:opacity 0.3s;letter-spacing:0.5px}
 .saved-flag.show{opacity:1}
 .loading-msg{padding:40px;text-align:center;color:var(--text-light);font-size:14px;letter-spacing:1px}
@@ -198,7 +211,7 @@ h1,h2,h3{font-family:'Playfair Display',serif}
 const SUPABASE_URL='https://bklesvxiawdqabwlmkni.supabase.co';
 const SUPABASE_KEY='sb_publishable_zOrrKM1d13aQoMBSlL9bng_r5_Wx8lW';
 const CLOUD_NAME='dt4j8dfql';
-const CLOUDINARY_UPLOAD_PRESET='REPLACE_ME'; // set this once the unsigned preset is created
+const CLOUDINARY_UPLOAD_PRESET='Meghamakeup'; // unsigned preset
 
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -215,11 +228,11 @@ function cldVideo(asset){
 // defaultPublished: whether a brand-new (not yet in Supabase) asset
 // shows up by default in that section.
 const CATEGORIES=[
-  {id:'hero',label:'Home · Hero Gallery',sources:[{tag:'work',resourceType:'image'}],defaultPublished:false,note:'Curated picks for the home page "Our Work" grid. Toggle ON the ones you want shown there.'},
-  {id:'reel',label:'Home · Reels',sources:[{tag:'portfolio',resourceType:'video'}],defaultPublished:true,note:'Videos shown in the home page reels carousel (Cloudinary tag: portfolio).'},
-  {id:'portfolio',label:'Work · Images',sources:[{tag:'work',resourceType:'image'}],defaultPublished:true,note:'Images shown in the Work page → Images tab (Cloudinary tag: work).'},
-  {id:'videos',label:'Work · Videos',sources:[{tag:'work',resourceType:'video'}],defaultPublished:true,note:'Videos shown in the Work page → Videos tab (Cloudinary tag: work).'},
-  {id:'hairstyle',label:'Hairstyle',sources:[{tag:'hairstyle',resourceType:'image'},{tag:'hairstyle',resourceType:'video'}],defaultPublished:true,note:'Mixed images & videos shown in the Work page → Hairstyle tab (Cloudinary tag: hairstyle).'}
+  {id:'hero',label:'Home · Hero Gallery',sources:[{tag:'work',resourceType:'image'}],defaultPublished:false,uploadTag:'work',uploadAccept:'image/*',note:'Curated picks for the home page "Our Work" grid. Toggle ON the ones you want shown there.'},
+  {id:'reel',label:'Home · Reels',sources:[{tag:'portfolio',resourceType:'video'}],defaultPublished:true,uploadTag:'portfolio',uploadAccept:'video/*',note:'Videos shown in the home page reels carousel (Cloudinary tag: portfolio).'},
+  {id:'portfolio',label:'Work · Images',sources:[{tag:'work',resourceType:'image'}],defaultPublished:true,uploadTag:'work',uploadAccept:'image/*',note:'Images shown in the Work page → Images tab (Cloudinary tag: work).'},
+  {id:'videos',label:'Work · Videos',sources:[{tag:'work',resourceType:'video'}],defaultPublished:true,uploadTag:'work',uploadAccept:'video/*',note:'Videos shown in the Work page → Videos tab (Cloudinary tag: work).'},
+  {id:'hairstyle',label:'Hairstyle',sources:[{tag:'hairstyle',resourceType:'image'},{tag:'hairstyle',resourceType:'video'}],defaultPublished:true,uploadTag:'hairstyle',uploadAccept:'image/*,video/*',note:'Mixed images & videos shown in the Work page → Hairstyle tab (Cloudinary tag: hairstyle).'}
 ];
 
 // ── AUTH ─────────────────────────────────────────────────
@@ -280,10 +293,14 @@ function initDashboard(){
         <h2>${cat.label}</h2>
         <div class="panel-actions">
           <span class="saved-flag" id="saved-${cat.id}">✦ Saved</span>
+          <label class="upload-btn-label">+ Upload
+            <input type="file" id="upload-${cat.id}" accept="${cat.uploadAccept}" multiple hidden/>
+          </label>
           <button class="save-btn" id="save-${cat.id}">Save Changes</button>
         </div>
       </div>
       <p class="panel-source">${cat.note}</p>
+      <div class="upload-progress" id="progress-${cat.id}"></div>
       <div class="admin-grid" id="grid-${cat.id}">
         <div class="loading-msg">Loading…</div>
       </div>
@@ -291,6 +308,7 @@ function initDashboard(){
     panelsContainer.appendChild(panel);
 
     document.getElementById('save-'+cat.id).onclick=()=>saveCategory(cat);
+    document.getElementById('upload-'+cat.id).addEventListener('change',e=>handleUpload(cat,e.target));
 
     loadCategory(cat);
   });
@@ -362,60 +380,61 @@ async function loadCategory(cat){
   renderGrid(cat,merged);
 }
 
+function createCard(item){
+  const card=document.createElement('div');
+  card.className='admin-card'+(item.published?'':' hidden-item');
+  card.dataset.publicId=item.public_id;
+  card.dataset.version=item.version||'';
+  card.dataset.resourceType=item.resource_type;
+  card.dataset.format=item.format||'';
+  card.dataset.customThumb=item.custom_thumbnail||'';
+
+  let thumbHtml;
+  if(item.resource_type==='image'){
+    const v=item.version?`v${item.version}/`:'';
+    const url=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/w_300,c_fill,q_auto/${v}${item.public_id}.${item.format}`;
+    thumbHtml=`<img src="${url}" loading="lazy" alt=""/>`;
+  }else{
+    const poster=item.custom_thumbnail||cldVideo({public_id:item.public_id,version:item.version}).poster;
+    thumbHtml=`<img src="${poster}" loading="lazy" alt=""/><span class="card-type-badge">🎬</span>`;
+  }
+
+  card.innerHTML=`
+    <div class="card-thumb">${thumbHtml}</div>
+    <div class="card-controls">
+      <label class="toggle">
+        <input type="checkbox" class="pub-toggle" ${item.published?'checked':''}/>
+        <span class="toggle-label">${item.published?'Visible':'Hidden'}</span>
+      </label>
+      ${item.resource_type==='video'?'<button type="button" class="thumb-btn">Thumbnail</button>':''}
+      <span class="drag-handle" title="Drag to reorder">⠿⠿</span>
+    </div>
+  `;
+
+  const toggle=card.querySelector('.pub-toggle');
+  const toggleLabel=card.querySelector('.toggle-label');
+  toggle.onchange=()=>{
+    card.classList.toggle('hidden-item',!toggle.checked);
+    toggleLabel.textContent=toggle.checked?'Visible':'Hidden';
+  };
+
+  const thumbBtn=card.querySelector('.thumb-btn');
+  if(thumbBtn){
+    thumbBtn.onclick=()=>openFramePicker(card,item);
+  }
+
+  return card;
+}
+
 function renderGrid(cat,items){
   const grid=document.getElementById('grid-'+cat.id);
   grid.innerHTML='';
 
   if(items.length===0){
     grid.innerHTML='<div class="loading-msg">No assets found yet for this section.</div>';
-    return;
+  }else{
+    items.forEach(item=>grid.appendChild(createCard(item)));
   }
-
-  items.forEach(item=>{
-    const card=document.createElement('div');
-    card.className='admin-card'+(item.published?'':' hidden-item');
-    card.dataset.publicId=item.public_id;
-    card.dataset.version=item.version||'';
-    card.dataset.resourceType=item.resource_type;
-    card.dataset.format=item.format||'';
-    card.dataset.customThumb=item.custom_thumbnail||'';
-
-    let thumbHtml;
-    if(item.resource_type==='image'){
-      const v=item.version?`v${item.version}/`:'';
-      const url=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/w_300,c_fill,q_auto/${v}${item.public_id}.${item.format}`;
-      thumbHtml=`<img src="${url}" loading="lazy" alt=""/>`;
-    }else{
-      const poster=item.custom_thumbnail||cldVideo({public_id:item.public_id,version:item.version}).poster;
-      thumbHtml=`<img src="${poster}" loading="lazy" alt=""/><span class="card-type-badge">🎬</span>`;
-    }
-
-    card.innerHTML=`
-      <div class="card-thumb">${thumbHtml}</div>
-      <div class="card-controls">
-        <label class="toggle">
-          <input type="checkbox" class="pub-toggle" ${item.published?'checked':''}/>
-          <span class="toggle-label">${item.published?'Visible':'Hidden'}</span>
-        </label>
-        ${item.resource_type==='video'?'<button type="button" class="thumb-btn">Thumbnail</button>':''}
-        <span class="drag-handle" title="Drag to reorder">⠿⠿</span>
-      </div>
-    `;
-
-    const toggle=card.querySelector('.pub-toggle');
-    const toggleLabel=card.querySelector('.toggle-label');
-    toggle.onchange=()=>{
-      card.classList.toggle('hidden-item',!toggle.checked);
-      toggleLabel.textContent=toggle.checked?'Visible':'Hidden';
-    };
-
-    const thumbBtn=card.querySelector('.thumb-btn');
-    if(thumbBtn){
-      thumbBtn.onclick=()=>openFramePicker(card,item);
-    }
-
-    grid.appendChild(card);
-  });
 
   if(grid._sortable) grid._sortable.destroy();
   grid._sortable=new Sortable(grid,{handle:'.drag-handle',animation:150,ghostClass:'sortable-ghost'});
@@ -454,6 +473,73 @@ async function saveCategory(cat){
     flag.classList.add('show');
     setTimeout(()=>flag.classList.remove('show'),2000);
   }
+}
+
+// ── DIRECT UPLOAD ────────────────────────────────────────
+async function handleUpload(cat,inputEl){
+  const files=[...inputEl.files];
+  if(files.length===0) return;
+
+  if(CLOUDINARY_UPLOAD_PRESET==='REPLACE_ME'){
+    alert('Upload isn\'t set up yet — create an unsigned Cloudinary upload preset and ask Claude to wire in the preset name.');
+    inputEl.value='';
+    return;
+  }
+
+  const progress=document.getElementById('progress-'+cat.id);
+  const grid=document.getElementById('grid-'+cat.id);
+
+  for(const file of files){
+    const row=document.createElement('div');
+    row.className='upload-row';
+    row.textContent=`${file.name} — uploading…`;
+    progress.appendChild(row);
+
+    const resourceType=file.type.startsWith('video/')?'video':'image';
+    const fd=new FormData();
+    fd.append('file',file);
+    fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
+    fd.append('tags',cat.uploadTag);
+
+    try{
+      const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`,{method:'POST',body:fd});
+      const data=await res.json();
+      if(!data.public_id) throw new Error((data.error&&data.error.message)||'Upload failed');
+
+      const {error}=await sb.from('media_items').upsert({
+        cloudinary_public_id:data.public_id,
+        cloudinary_version:String(data.version),
+        resource_type:resourceType,
+        category:cat.id,
+        custom_thumbnail:null,
+        sort_order:Date.now(),
+        published:true
+      },{onConflict:'cloudinary_public_id,category'});
+      if(error) throw new Error(error.message);
+
+      // Show it immediately (Cloudinary's tag-list cache can lag a bit)
+      if(grid.querySelector('.loading-msg')) grid.innerHTML='';
+      grid.appendChild(createCard({
+        public_id:data.public_id,
+        version:data.version,
+        format:data.format,
+        resource_type:resourceType,
+        custom_thumbnail:null,
+        published:true
+      }));
+      if(grid._sortable) grid._sortable.destroy();
+      grid._sortable=new Sortable(grid,{handle:'.drag-handle',animation:150,ghostClass:'sortable-ghost'});
+
+      row.textContent=`${file.name} — done ✓`;
+      row.classList.add('upload-done');
+    }catch(err){
+      row.textContent=`${file.name} — failed: ${err.message}`;
+      row.classList.add('upload-error');
+    }
+  }
+
+  inputEl.value='';
+  setTimeout(()=>{ progress.innerHTML=''; },4000);
 }
 
 // ── THUMBNAIL PICKER ─────────────────────────────────────
