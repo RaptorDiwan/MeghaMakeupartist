@@ -153,6 +153,16 @@ nav{
   font-size:20px;transition:transform 0.2s;
 }
 .video-item:hover .play-circle{transform:scale(1.1)}
+.video-error-msg{
+  position:absolute;inset:0;display:none;
+  align-items:center;justify-content:center;
+  text-align:center;color:#f0d8d0;font-size:12px;
+  letter-spacing:1px;padding:16px;line-height:1.6;
+}
+.video-item.video-error video{opacity:0}
+.video-item.video-error .video-play-overlay{background:rgba(46,26,26,0.55)}
+.video-item.video-error .play-circle{display:none}
+.video-item.video-error .video-error-msg{display:flex}
 
 /* INFINITE SCROLL */
 .load-more-sentinel{height:60px;display:flex;align-items:center;justify-content:center;margin-top:12px}
@@ -423,6 +433,28 @@ async function fetchPortfolio(){
 }
 
 // ── VIDEOS ──────────────────────────────────────────────────
+const cloudName='dt4j8dfql';
+
+// Build a web-safe (h264/aac mp4) src + a real poster thumbnail
+// from either a Cloudinary list-API resource {public_id, version}
+// or a raw cloudinary delivery URL string.
+function cldVideo(asset){
+  let publicId, version;
+  if(typeof asset==='string'){
+    const m=asset.match(/\/upload\/(?:v(\d+)\/)?(.+)\.\w+$/);
+    version=m?m[1]:null;
+    publicId=m?m[2]:asset;
+  }else{
+    publicId=asset.public_id;
+    version=asset.version;
+  }
+  const v=version?`v${version}/`:'';
+  return{
+    src:`https://res.cloudinary.com/${cloudName}/video/upload/f_mp4,vc_h264,ac_aac,q_auto/${v}${publicId}.mp4`,
+    poster:`https://res.cloudinary.com/${cloudName}/video/upload/so_0,q_auto,w_500/${v}${publicId}.jpg`
+  };
+}
+
 function toggleVideo(card){
   const vid=card.querySelector('video');
   const overlay=card.querySelector('.video-play-overlay');
@@ -440,16 +472,16 @@ function toggleVideo(card){
 async function fetchVideos(){
   const grid=document.getElementById('video-grid');
   try{
-    const res=await fetch('https://res.cloudinary.com/dt4j8dfql/video/list/work.json');
+    const res=await fetch(`https://res.cloudinary.com/${cloudName}/video/list/work.json`);
     const data=await res.json();
     if(data.resources&&data.resources.length>0){
       grid.innerHTML='';
       data.resources.forEach(asset=>{
-        const url=`https://res.cloudinary.com/dt4j8dfql/video/upload/v${asset.version}/${asset.public_id}.${asset.format}`;
+        const {src,poster}=cldVideo(asset);
         const item=document.createElement('div');
         item.className='video-item';
         item.onclick=()=>toggleVideo(item);
-        item.innerHTML=`<video src="${url}" loop playsinline preload="metadata"></video><div class="video-play-overlay"><div class="play-circle">▶</div></div>`;
+        item.innerHTML=`<video src="${src}" poster="${poster}" loop playsinline preload="metadata" onerror="this.closest('.video-item').classList.add('video-error')"></video><div class="video-play-overlay"><div class="play-circle">▶</div></div><div class="video-error-msg">⚠ Video unavailable</div>`;
         grid.appendChild(item);
       });
       document.getElementById('vid-end').classList.add('show');

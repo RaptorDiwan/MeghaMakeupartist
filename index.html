@@ -315,6 +315,16 @@ section{padding:100px 48px}
 .reel-arrow:hover{background:var(--deep-rose);color:white;transform:translateY(-50%) scale(1.05)}
 .reel-arrow.prev{left:-22px}
 .reel-arrow.next{right:-22px}
+.video-error-msg{
+  position:absolute;inset:0;display:none;
+  align-items:center;justify-content:center;
+  text-align:center;color:#f0d8d0;font-size:12px;
+  letter-spacing:1px;padding:16px;line-height:1.6;
+}
+.reel-card.video-error video{opacity:0}
+.reel-card.video-error .reel-play{background:rgba(46,26,26,0.55)}
+.reel-card.video-error .play-btn{display:none}
+.reel-card.video-error .video-error-msg{display:flex}
 @media(max-width:768px){
   .reel-arrow{display:none}
   .reel-card{flex:0 0 calc(50% - 8px)}
@@ -723,6 +733,26 @@ function sendWhatsApp(){
 <script>
   const cloudName = 'dt4j8dfql';
 
+  // Build a web-safe (h264/aac mp4) src + a real poster thumbnail
+  // from either a Cloudinary list-API resource {public_id, version}
+  // or a raw cloudinary delivery URL string.
+  function cldVideo(asset){
+    let publicId, version;
+    if(typeof asset==='string'){
+      const m=asset.match(/\/upload\/(?:v(\d+)\/)?(.+)\.\w+$/);
+      version=m?m[1]:null;
+      publicId=m?m[2]:asset;
+    }else{
+      publicId=asset.public_id;
+      version=asset.version;
+    }
+    const v=version?`v${version}/`:'';
+    return{
+      src:`https://res.cloudinary.com/${cloudName}/video/upload/f_mp4,vc_h264,ac_aac,q_auto/${v}${publicId}.mp4`,
+      poster:`https://res.cloudinary.com/${cloudName}/video/upload/so_0,q_auto,w_500/${v}${publicId}.jpg`
+    };
+  }
+
   // Fetch portfolio images
   async function fetchPortfolioImages() {
     const gallery = document.getElementById('portfolio-grid');
@@ -757,13 +787,14 @@ function sendWhatsApp(){
       'https://res.cloudinary.com/dt4j8dfql/video/upload/v1778427360/SaveClip.App_AQPwiVu3mF-B75DJGph06khtJ8m9onuSt9-Q6s1Mf4M7YrSgfo8o7hbkdBGAA1vB6DQxUMA86cuWVvMgx7V2SM2EyRP7rZWvdYBZwZA_cyp0ui.mp4'
     ];
 
-    function renderVideos(urls) {
+    function renderVideos(items) {
       reelsGrid.innerHTML = '';
-      urls.forEach(url => {
+      items.forEach(asset => {
+        const {src, poster} = cldVideo(asset);
         const card = document.createElement('div');
         card.className = 'reel-card';
         card.setAttribute('onclick', 'toggleReel(this)');
-        card.innerHTML = `<video src="${url}" loop playsinline preload="metadata"></video><div class="reel-play"><div class="play-btn">▶</div></div>`;
+        card.innerHTML = `<video src="${src}" poster="${poster}" loop playsinline preload="metadata" onerror="this.closest('.reel-card').classList.add('video-error')"></video><div class="reel-play"><div class="play-btn">▶</div></div><div class="video-error-msg">⚠ Video unavailable</div>`;
         reelsGrid.appendChild(card);
       });
     }
@@ -772,8 +803,7 @@ function sendWhatsApp(){
       const res = await fetch(`https://res.cloudinary.com/${cloudName}/video/list/portfolio.json`);
       const data = await res.json();
       if (data.resources && data.resources.length > 0) {
-        const urls = data.resources.map(a => `https://res.cloudinary.com/${cloudName}/video/upload/v${a.version}/${a.public_id}.${a.format}`);
-        renderVideos(urls);
+        renderVideos(data.resources);
       } else {
         renderVideos(fallbackVideos);
       }
