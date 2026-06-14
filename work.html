@@ -193,7 +193,20 @@ nav{
   z-index:999;opacity:0;pointer-events:none;transition:opacity 0.3s;
 }
 .lightbox.active{opacity:1;pointer-events:all}
-.lightbox img{max-width:90vw;max-height:88vh;border-radius:8px;object-fit:contain}
+.lightbox img{max-width:90vw;max-height:88vh;border-radius:8px;object-fit:contain;cursor:zoom-in;transition:transform 0.25s ease}
+.lightbox img.zoomed{cursor:zoom-out;transform:scale(2.2)}
+.lb-zoom-hint{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,0.12);color:white;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:8px 18px;border-radius:30px;
+  backdrop-filter:blur(6px);pointer-events:none;
+  opacity:1;transition:opacity 0.4s;white-space:nowrap;
+}
+.lb-zoom-hint.hide{opacity:0}
+@media(max-width:768px){
+  .lb-zoom-hint{font-size:10px;padding:7px 14px}
+}
 .lb-close{position:fixed;top:24px;right:32px;background:none;border:none;color:white;font-size:28px;cursor:pointer;z-index:1000}
 .lb-prev,.lb-next{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);border:none;color:white;font-size:40px;cursor:pointer;padding:12px 18px;border-radius:8px;transition:background 0.2s;z-index:1000}
 .lb-prev{left:16px}.lb-next{right:16px}
@@ -301,8 +314,9 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <button class="lb-prev" onclick="lbNav(-1);event.stopPropagation()">‹</button>
-  <img id="lbImg" src="" alt=""/>
+  <img id="lbImg" src="" alt="" onclick="toggleZoom(event)" onmousemove="lbPanZoom(event)"/>
   <button class="lb-next" onclick="lbNav(1);event.stopPropagation()">›</button>
+  <div class="lb-zoom-hint" id="lbZoomHint">🔍 Click image to zoom in</div>
 </div>
 
 <!-- FOOTER -->
@@ -338,22 +352,55 @@ function openLightbox(src){
   document.getElementById('lbImg').src=src;
   document.getElementById('lightbox').classList.add('active');
   document.body.style.overflow='hidden';
+  resetZoom();
 }
 function closeLightbox(e){
   if(!e||e.target===document.getElementById('lightbox')||e.target.classList.contains('lb-close')){
     document.getElementById('lightbox').classList.remove('active');
     document.body.style.overflow='';
+    resetZoom();
   }
 }
 function lbNav(d){
   lbIdx=(lbIdx+d+lbImgs.length)%lbImgs.length;
   document.getElementById('lbImg').src=lbImgs[lbIdx];
+  resetZoom();
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight')lbNav(1);
   if(e.key==='ArrowLeft')lbNav(-1);
   if(e.key==='Escape')closeLightbox({target:document.getElementById('lightbox')});
 });
+
+// Lightbox zoom
+function setZoomOrigin(img,e){
+  const rect=img.getBoundingClientRect();
+  const x=((e.clientX-rect.left)/rect.width)*100;
+  const y=((e.clientY-rect.top)/rect.height)*100;
+  img.style.transformOrigin=`${x}% ${y}%`;
+}
+function toggleZoom(e){
+  const img=e.target;
+  if(img.classList.contains('zoomed')){
+    img.classList.remove('zoomed');
+    img.style.transformOrigin='center center';
+  }else{
+    setZoomOrigin(img,e);
+    img.classList.add('zoomed');
+  }
+  document.getElementById('lbZoomHint').classList.add('hide');
+  e.stopPropagation();
+}
+function lbPanZoom(e){
+  const img=e.target;
+  if(img.classList.contains('zoomed'))setZoomOrigin(img,e);
+}
+function resetZoom(){
+  const img=document.getElementById('lbImg');
+  img.classList.remove('zoomed');
+  img.style.transformOrigin='center center';
+  document.getElementById('lbZoomHint').classList.remove('hide');
+}
 
 // ── IMAGES – INFINITE SCROLL ────────────────────────────────
 const BATCH = 15;

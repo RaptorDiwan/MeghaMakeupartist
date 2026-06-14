@@ -234,6 +234,22 @@ section{padding:100px 48px}
   max-width:88vw;max-height:88vh;
   border-radius:12px;object-fit:contain;
   box-shadow:0 24px 80px rgba(0,0,0,0.6);
+  cursor:zoom-in;transition:transform 0.25s ease;
+}
+.lightbox img.zoomed{
+  cursor:zoom-out;transform:scale(2.2);
+}
+.lb-zoom-hint{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,0.12);color:white;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:8px 18px;border-radius:30px;
+  backdrop-filter:blur(6px);pointer-events:none;
+  opacity:1;transition:opacity 0.4s;white-space:nowrap;
+}
+.lb-zoom-hint.hide{opacity:0}
+@media(max-width:768px){
+  .lb-zoom-hint{font-size:10px;padding:7px 14px}
 }
 .lb-close{
   position:fixed;top:24px;right:32px;
@@ -558,7 +574,7 @@ footer>p{font-size:14px;color:#a07070;margin-bottom:28px}
       </div>
     </div>
     <div class="insta-cta fade-up">
-      <p>🌸 80+ looks and growing — see the full collection of images & videos!</p>
+      <p>🌸 1000+ looks and growing — see the full collection of images & videos!</p>
       <a href="work.html" class="btn-insta">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         See All Images & Videos →
@@ -663,8 +679,9 @@ footer>p{font-size:14px;color:#a07070;margin-bottom:28px}
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <button class="lb-close" onclick="closeLightbox()">✕</button>
   <button class="lb-prev" onclick="lbNav(-1);event.stopPropagation()">‹</button>
-  <img id="lbImg" src="" alt=""/>
+  <img id="lbImg" src="" alt="" onclick="toggleZoom(event)" onmousemove="lbPanZoom(event)"/>
   <button class="lb-next" onclick="lbNav(1);event.stopPropagation()">›</button>
+  <div class="lb-zoom-hint" id="lbZoomHint">🔍 Click image to zoom in</div>
 </div>
 
 <script>
@@ -693,10 +710,40 @@ const imgs=[
   'https://res.cloudinary.com/dt4j8dfql/image/upload/v1778435474/642709919_18063461879654429_636483631102728729_n._rtwb60.jpg'
 ];
 let lbIdx=0;
-function openLightbox(i){lbIdx=i;document.getElementById('lbImg').src=imgs[i];document.getElementById('lightbox').classList.add('active');document.body.style.overflow='hidden'}
-function closeLightbox(e){if(!e||e.target===document.getElementById('lightbox')||e.target.classList.contains('lb-close')){document.getElementById('lightbox').classList.remove('active');document.body.style.overflow='';}}
-function lbNav(d){lbIdx=(lbIdx+d+imgs.length)%imgs.length;document.getElementById('lbImg').src=imgs[lbIdx]}
+function openLightbox(i){lbIdx=i;document.getElementById('lbImg').src=imgs[i];document.getElementById('lightbox').classList.add('active');document.body.style.overflow='hidden';resetZoom();}
+function closeLightbox(e){if(!e||e.target===document.getElementById('lightbox')||e.target.classList.contains('lb-close')){document.getElementById('lightbox').classList.remove('active');document.body.style.overflow='';resetZoom();}}
+function lbNav(d){lbIdx=(lbIdx+d+imgs.length)%imgs.length;document.getElementById('lbImg').src=imgs[lbIdx];resetZoom();}
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')lbNav(1);if(e.key==='ArrowLeft')lbNav(-1);if(e.key==='Escape')closeLightbox({target:document.getElementById('lightbox')});});
+
+// Lightbox zoom
+function setZoomOrigin(img,e){
+  const rect=img.getBoundingClientRect();
+  const x=((e.clientX-rect.left)/rect.width)*100;
+  const y=((e.clientY-rect.top)/rect.height)*100;
+  img.style.transformOrigin=`${x}% ${y}%`;
+}
+function toggleZoom(e){
+  const img=e.target;
+  if(img.classList.contains('zoomed')){
+    img.classList.remove('zoomed');
+    img.style.transformOrigin='center center';
+  }else{
+    setZoomOrigin(img,e);
+    img.classList.add('zoomed');
+  }
+  document.getElementById('lbZoomHint').classList.add('hide');
+  e.stopPropagation();
+}
+function lbPanZoom(e){
+  const img=e.target;
+  if(img.classList.contains('zoomed'))setZoomOrigin(img,e);
+}
+function resetZoom(){
+  const img=document.getElementById('lbImg');
+  img.classList.remove('zoomed');
+  img.style.transformOrigin='center center';
+  document.getElementById('lbZoomHint').classList.remove('hide');
+}
 
 // Footer year
 document.getElementById('footer-year').textContent = new Date().getFullYear();
