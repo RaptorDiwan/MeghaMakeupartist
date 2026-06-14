@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Admin · Megha Makeup Artist</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blush:#f7d6d0;--rose:#e8a598;--deep-rose:#c4726a;
+  --cream:#fdf6f0;--warm-white:#fffaf7;
+  --text-dark:#2e1a1a;--text-mid:#6b3f3f;--text-light:#a07070;
+  --gold:#c9a96e;
+}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh}
+h1,h2,h3{font-family:'Playfair Display',serif}
+
+/* LOGIN */
+.login-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.login-card{
+  background:var(--warm-white);border:1px solid #f0d8d0;border-radius:18px;
+  padding:40px 36px;max-width:380px;width:100%;
+  box-shadow:0 20px 60px rgba(196,114,106,0.12);
+}
+.login-card h1{font-size:26px;margin-bottom:6px;color:var(--text-dark)}
+.login-card p.sub{font-size:13px;color:var(--text-light);margin-bottom:24px;letter-spacing:0.5px}
+.login-card label{display:block;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px}
+.login-card input{
+  width:100%;padding:12px 14px;border:1px solid #f0d8d0;border-radius:10px;
+  font-family:'Jost',sans-serif;font-size:14px;margin-bottom:16px;background:var(--cream);color:var(--text-dark);
+}
+.login-card input:focus{outline:none;border-color:var(--deep-rose)}
+.login-card button{
+  width:100%;padding:13px;border:none;border-radius:10px;background:var(--deep-rose);color:white;
+  font-family:'Jost',sans-serif;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;
+}
+.login-card button:hover{background:var(--text-mid)}
+.login-error{color:#b3413c;font-size:13px;margin-top:12px;display:none}
+.login-error.show{display:block}
+
+/* DASHBOARD */
+.dash{display:none}
+.dash.active{display:block}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;background:var(--warm-white);border-bottom:1px solid #f0d8d0;
+  position:sticky;top:0;z-index:50;
+}
+.topbar h1{font-size:20px}
+.topbar h1 em{color:var(--deep-rose);font-style:normal}
+.logout-btn{
+  background:transparent;border:1px solid #f0d8d0;border-radius:30px;padding:8px 20px;
+  font-family:'Jost',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-mid);cursor:pointer;transition:all 0.2s;
+}
+.logout-btn:hover{background:var(--blush);border-color:var(--rose)}
+
+.tab-pills{
+  display:flex;flex-wrap:wrap;gap:8px;padding:20px 32px 0;
+}
+.tab-pill{
+  padding:10px 22px;border-radius:30px;border:1px solid #f0d8d0;background:var(--warm-white);
+  font-family:'Jost',sans-serif;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--text-mid);cursor:pointer;transition:all 0.2s;
+}
+.tab-pill.active{background:var(--deep-rose);color:white;border-color:var(--deep-rose)}
+.tab-pill:not(.active):hover{background:var(--blush)}
+
+.admin-panel{display:none;padding:24px 32px 60px}
+.admin-panel.active{display:block}
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  margin-bottom:6px;
+}
+.panel-header h2{font-size:22px}
+.panel-source{font-size:12px;color:var(--text-light);letter-spacing:0.5px;margin-bottom:18px}
+.panel-actions{display:flex;align-items:center;gap:12px}
+.save-btn{
+  background:var(--deep-rose);color:white;border:none;border-radius:30px;padding:10px 26px;
+  font-family:'Jost',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s;
+}
+.save-btn:hover{background:var(--text-mid)}
+.saved-flag{font-size:12px;color:#5a8c5a;opacity:0;transition:opacity 0.3s;letter-spacing:0.5px}
+.saved-flag.show{opacity:1}
+.loading-msg{padding:40px;text-align:center;color:var(--text-light);font-size:14px;letter-spacing:1px}
+
+.admin-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;
+}
+.admin-card{
+  border-radius:14px;overflow:hidden;background:var(--warm-white);border:1px solid #f0d8d0;
+  transition:opacity 0.2s;
+}
+.admin-card.hidden-item{opacity:0.4}
+.card-thumb{position:relative;aspect-ratio:3/4;background:#2e1a1a;overflow:hidden}
+.card-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.card-type-badge{
+  position:absolute;top:8px;left:8px;background:rgba(46,26,26,0.6);color:white;
+  font-size:14px;border-radius:6px;padding:2px 6px;line-height:1.2;
+}
+.card-controls{padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.toggle{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.5px;color:var(--text-mid);cursor:pointer}
+.toggle input{accent-color:var(--deep-rose);width:15px;height:15px;cursor:pointer}
+.thumb-btn{
+  background:var(--blush);border:none;border-radius:20px;padding:5px 12px;font-size:11px;
+  font-family:'Jost',sans-serif;letter-spacing:0.5px;color:var(--text-mid);cursor:pointer;transition:background 0.2s;
+}
+.thumb-btn:hover{background:var(--rose);color:white}
+.drag-handle{cursor:grab;font-size:16px;color:var(--text-light);user-select:none;padding:0 4px}
+.drag-handle:active{cursor:grabbing}
+.sortable-ghost{opacity:0.3}
+
+/* FRAME PICKER MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(46,26,26,0.55);display:none;
+  align-items:center;justify-content:center;z-index:200;padding:20px;
+}
+.modal-overlay.active{display:flex}
+.modal-box{
+  background:var(--warm-white);border-radius:16px;padding:28px;max-width:480px;width:100%;
+  max-height:90vh;overflow:auto;
+}
+.modal-box h3{font-size:20px;margin-bottom:14px}
+.modal-box video{width:100%;border-radius:10px;background:#2e1a1a;margin-bottom:14px}
+.modal-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.modal-actions button,.modal-actions .upload-btn{
+  flex:1;text-align:center;padding:11px 14px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Jost',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  background:var(--deep-rose);color:white;transition:background 0.2s;
+}
+.modal-actions button:hover,.modal-actions .upload-btn:hover{background:var(--text-mid)}
+.modal-actions button.secondary{background:transparent;border:1px solid #f0d8d0;color:var(--text-mid)}
+.modal-actions button.secondary:hover{background:var(--blush)}
+.modal-hint{font-size:12px;color:var(--text-light);line-height:1.6}
+
+@media(max-width:600px){
+  .topbar,.tab-pills,.admin-panel{padding-left:16px;padding-right:16px}
+  .admin-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginView">
+  <div class="login-card">
+    <h1>Megha · Admin</h1>
+    <p class="sub">Sign in to manage portfolio content</p>
+    <form id="loginForm">
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" required autocomplete="username"/>
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password"/>
+      <button type="submit">Log In</button>
+      <p class="login-error" id="loginError"></p>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash" id="dashView">
+  <div class="topbar">
+    <h1><em>Megha</em> · Admin</h1>
+    <button class="logout-btn" id="logoutBtn">Log Out</button>
+  </div>
+
+  <div class="tab-pills" id="tabPills"></div>
+
+  <div id="panelsContainer"></div>
+</div>
+
+<!-- FRAME PICKER MODAL -->
+<div class="modal-overlay" id="framePicker">
+  <div class="modal-box">
+    <h3>Choose Thumbnail</h3>
+    <video id="fpVideo" controls playsinline></video>
+    <div class="modal-actions">
+      <button type="button" id="fpUseFrame">Use Current Frame</button>
+      <label class="upload-btn">Upload Image
+        <input type="file" id="fpUpload" accept="image/*" hidden/>
+      </label>
+      <button type="button" class="secondary" id="fpClose">Cancel</button>
+    </div>
+    <p class="modal-hint">Scrub the video to the moment you want, then click "Use Current Frame" — or upload your own image instead.</p>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+const SUPABASE_URL='https://bklesvxiawdqabwlmkni.supabase.co';
+const SUPABASE_KEY='sb_publishable_zOrrKM1d13aQoMBSlL9bng_r5_Wx8lW';
+const CLOUD_NAME='dt4j8dfql';
+const CLOUDINARY_UPLOAD_PRESET='REPLACE_ME'; // set this once the unsigned preset is created
+
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// Build a web-safe src + poster from a {public_id, version}
+function cldVideo(asset){
+  const v=asset.version?`v${asset.version}/`:'';
+  return{
+    src:`https://res.cloudinary.com/${CLOUD_NAME}/video/upload/f_mp4,vc_h264,ac_aac,q_auto/${v}${asset.public_id}.mp4`,
+    poster:`https://res.cloudinary.com/${CLOUD_NAME}/video/upload/so_0,q_auto,w_500/${v}${asset.public_id}.jpg`
+  };
+}
+
+// ── CATEGORIES ───────────────────────────────────────────
+// defaultPublished: whether a brand-new (not yet in Supabase) asset
+// shows up by default in that section.
+const CATEGORIES=[
+  {id:'hero',label:'Home · Hero Gallery',sources:[{tag:'work',resourceType:'image'}],defaultPublished:false,note:'Curated picks for the home page "Our Work" grid. Toggle ON the ones you want shown there.'},
+  {id:'reel',label:'Home · Reels',sources:[{tag:'portfolio',resourceType:'video'}],defaultPublished:true,note:'Videos shown in the home page reels carousel (Cloudinary tag: portfolio).'},
+  {id:'portfolio',label:'Work · Images',sources:[{tag:'work',resourceType:'image'}],defaultPublished:true,note:'Images shown in the Work page → Images tab (Cloudinary tag: work).'},
+  {id:'videos',label:'Work · Videos',sources:[{tag:'work',resourceType:'video'}],defaultPublished:true,note:'Videos shown in the Work page → Videos tab (Cloudinary tag: work).'},
+  {id:'hairstyle',label:'Hairstyle',sources:[{tag:'hairstyle',resourceType:'image'},{tag:'hairstyle',resourceType:'video'}],defaultPublished:true,note:'Mixed images & videos shown in the Work page → Hairstyle tab (Cloudinary tag: hairstyle).'}
+];
+
+// ── AUTH ─────────────────────────────────────────────────
+const loginView=document.getElementById('loginView');
+const dashView=document.getElementById('dashView');
+const loginForm=document.getElementById('loginForm');
+const loginError=document.getElementById('loginError');
+
+loginForm.addEventListener('submit',async (e)=>{
+  e.preventDefault();
+  loginError.classList.remove('show');
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const {error}=await supabase.auth.signInWithPassword({email,password});
+  if(error){
+    loginError.textContent=error.message;
+    loginError.classList.add('show');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click',async ()=>{
+  await supabase.auth.signOut();
+});
+
+supabase.auth.onAuthStateChange((event,session)=>{
+  if(session){
+    loginView.style.display='none';
+    dashView.classList.add('active');
+    initDashboard();
+  }else{
+    dashView.classList.remove('active');
+    loginView.style.display='flex';
+  }
+});
+
+// ── DASHBOARD ────────────────────────────────────────────
+let dashInitialized=false;
+
+function initDashboard(){
+  if(dashInitialized) return;
+  dashInitialized=true;
+
+  const tabPills=document.getElementById('tabPills');
+  const panelsContainer=document.getElementById('panelsContainer');
+
+  CATEGORIES.forEach((cat,i)=>{
+    const pill=document.createElement('button');
+    pill.className='tab-pill'+(i===0?' active':'');
+    pill.textContent=cat.label;
+    pill.onclick=()=>switchAdminTab(cat.id);
+    tabPills.appendChild(pill);
+
+    const panel=document.createElement('div');
+    panel.className='admin-panel'+(i===0?' active':'');
+    panel.id='panel-'+cat.id;
+    panel.innerHTML=`
+      <div class="panel-header">
+        <h2>${cat.label}</h2>
+        <div class="panel-actions">
+          <span class="saved-flag" id="saved-${cat.id}">✦ Saved</span>
+          <button class="save-btn" id="save-${cat.id}">Save Changes</button>
+        </div>
+      </div>
+      <p class="panel-source">${cat.note}</p>
+      <div class="admin-grid" id="grid-${cat.id}">
+        <div class="loading-msg">Loading…</div>
+      </div>
+    `;
+    panelsContainer.appendChild(panel);
+
+    document.getElementById('save-'+cat.id).onclick=()=>saveCategory(cat);
+
+    loadCategory(cat);
+  });
+}
+
+function switchAdminTab(id){
+  document.querySelectorAll('.tab-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  const idx=CATEGORIES.findIndex(c=>c.id===id);
+  document.querySelectorAll('.tab-pill')[idx].classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// ── LOAD / MERGE / RENDER ────────────────────────────────
+async function fetchCloudinaryAssets(sources){
+  const all=[];
+  for(const src of sources){
+    try{
+      const res=await fetch(`https://res.cloudinary.com/${CLOUD_NAME}/${src.resourceType}/list/${src.tag}.json`);
+      const data=await res.json();
+      (data.resources||[]).forEach(a=>{
+        const fmt=(a.format||'').toLowerCase();
+        if(src.resourceType==='image' && ['mp4','mov','webm'].includes(fmt)) return;
+        all.push({
+          public_id:a.public_id,
+          version:a.version,
+          format:a.format,
+          resource_type:src.resourceType,
+          created_at:a.created_at
+        });
+      });
+    }catch(e){ /* tag may not exist yet, ignore */ }
+  }
+  return all;
+}
+
+async function loadCategory(cat){
+  const grid=document.getElementById('grid-'+cat.id);
+  const assets=await fetchCloudinaryAssets(cat.sources);
+
+  let rows=[];
+  try{
+    const {data}=await supabase.from('media_items').select('*').eq('category',cat.id);
+    rows=data||[];
+  }catch(e){ rows=[]; }
+
+  const rowMap={};
+  rows.forEach(r=>{ rowMap[r.cloudinary_public_id]=r; });
+
+  const merged=assets.map(a=>{
+    const row=rowMap[a.public_id];
+    return{
+      public_id:a.public_id,
+      version:a.version,
+      format:a.format,
+      resource_type:a.resource_type,
+      created_at:a.created_at,
+      custom_thumbnail:row?row.custom_thumbnail:null,
+      published:row?row.published:cat.defaultPublished,
+      sort_order:row&&row.sort_order!==null&&row.sort_order!==undefined?row.sort_order:Number.MAX_SAFE_INTEGER
+    };
+  });
+
+  merged.sort((x,y)=>{
+    if(x.sort_order!==y.sort_order) return x.sort_order-y.sort_order;
+    return new Date(y.created_at)-new Date(x.created_at);
+  });
+
+  renderGrid(cat,merged);
+}
+
+function renderGrid(cat,items){
+  const grid=document.getElementById('grid-'+cat.id);
+  grid.innerHTML='';
+
+  if(items.length===0){
+    grid.innerHTML='<div class="loading-msg">No assets found yet for this section.</div>';
+    return;
+  }
+
+  items.forEach(item=>{
+    const card=document.createElement('div');
+    card.className='admin-card'+(item.published?'':' hidden-item');
+    card.dataset.publicId=item.public_id;
+    card.dataset.version=item.version||'';
+    card.dataset.resourceType=item.resource_type;
+    card.dataset.format=item.format||'';
+    card.dataset.customThumb=item.custom_thumbnail||'';
+
+    let thumbHtml;
+    if(item.resource_type==='image'){
+      const v=item.version?`v${item.version}/`:'';
+      const url=`https://res.cloudinary.com/${CLOUD_NAME}/image/upload/w_300,c_fill,q_auto/${v}${item.public_id}.${item.format}`;
+      thumbHtml=`<img src="${url}" loading="lazy" alt=""/>`;
+    }else{
+      const poster=item.custom_thumbnail||cldVideo({public_id:item.public_id,version:item.version}).poster;
+      thumbHtml=`<img src="${poster}" loading="lazy" alt=""/><span class="card-type-badge">🎬</span>`;
+    }
+
+    card.innerHTML=`
+      <div class="card-thumb">${thumbHtml}</div>
+      <div class="card-controls">
+        <label class="toggle">
+          <input type="checkbox" class="pub-toggle" ${item.published?'checked':''}/>
+          <span class="toggle-label">${item.published?'Visible':'Hidden'}</span>
+        </label>
+        ${item.resource_type==='video'?'<button type="button" class="thumb-btn">Thumbnail</button>':''}
+        <span class="drag-handle" title="Drag to reorder">⠿⠿</span>
+      </div>
+    `;
+
+    const toggle=card.querySelector('.pub-toggle');
+    const toggleLabel=card.querySelector('.toggle-label');
+    toggle.onchange=()=>{
+      card.classList.toggle('hidden-item',!toggle.checked);
+      toggleLabel.textContent=toggle.checked?'Visible':'Hidden';
+    };
+
+    const thumbBtn=card.querySelector('.thumb-btn');
+    if(thumbBtn){
+      thumbBtn.onclick=()=>openFramePicker(card,item);
+    }
+
+    grid.appendChild(card);
+  });
+
+  if(grid._sortable) grid._sortable.destroy();
+  grid._sortable=new Sortable(grid,{handle:'.drag-handle',animation:150,ghostClass:'sortable-ghost'});
+}
+
+// ── SAVE ─────────────────────────────────────────────────
+async function saveCategory(cat){
+  const grid=document.getElementById('grid-'+cat.id);
+  const cards=[...grid.querySelectorAll('.admin-card')];
+  if(cards.length===0) return;
+
+  const rowsToUpsert=cards.map((card,index)=>({
+    cloudinary_public_id:card.dataset.publicId,
+    cloudinary_version:card.dataset.version||null,
+    resource_type:card.dataset.resourceType,
+    category:cat.id,
+    custom_thumbnail:card.dataset.customThumb||null,
+    sort_order:index,
+    published:card.querySelector('.pub-toggle').checked
+  }));
+
+  const saveBtn=document.getElementById('save-'+cat.id);
+  saveBtn.disabled=true;
+  saveBtn.textContent='Saving…';
+
+  const {error}=await supabase.from('media_items')
+    .upsert(rowsToUpsert,{onConflict:'cloudinary_public_id,category'});
+
+  saveBtn.disabled=false;
+  saveBtn.textContent='Save Changes';
+
+  if(error){
+    alert('Save failed: '+error.message);
+  }else{
+    const flag=document.getElementById('saved-'+cat.id);
+    flag.classList.add('show');
+    setTimeout(()=>flag.classList.remove('show'),2000);
+  }
+}
+
+// ── THUMBNAIL PICKER ─────────────────────────────────────
+let fpCard=null,fpItem=null;
+const framePicker=document.getElementById('framePicker');
+const fpVideo=document.getElementById('fpVideo');
+
+function openFramePicker(card,item){
+  fpCard=card;
+  fpItem=item;
+  fpVideo.src=cldVideo({public_id:item.public_id,version:item.version}).src;
+  framePicker.classList.add('active');
+}
+
+document.getElementById('fpClose').onclick=()=>{
+  framePicker.classList.remove('active');
+  fpVideo.pause();
+  fpVideo.removeAttribute('src');
+  fpVideo.load();
+};
+
+document.getElementById('fpUseFrame').onclick=()=>{
+  const t=Math.max(0,fpVideo.currentTime).toFixed(1);
+  const v=fpItem.version?`v${fpItem.version}/`:'';
+  const posterUrl=`https://res.cloudinary.com/${CLOUD_NAME}/video/upload/so_${t},q_auto,w_500/${v}${fpItem.public_id}.jpg`;
+  applyThumb(posterUrl);
+};
+
+document.getElementById('fpUpload').addEventListener('change',async (e)=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  if(CLOUDINARY_UPLOAD_PRESET==='REPLACE_ME'){
+    alert('Custom image upload isn\'t set up yet — for now, use "Use Current Frame" to pick a thumbnail from the video itself.');
+    e.target.value='';
+    return;
+  }
+  const fd=new FormData();
+  fd.append('file',file);
+  fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
+  try{
+    const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
+    const data=await res.json();
+    if(data.secure_url) applyThumb(data.secure_url);
+    else alert('Upload failed.');
+  }catch(err){
+    alert('Upload failed: '+err.message);
+  }
+  e.target.value='';
+});
+
+function applyThumb(url){
+  fpCard.dataset.customThumb=url;
+  fpCard.querySelector('.card-thumb img').src=url;
+  framePicker.classList.remove('active');
+  fpVideo.pause();
+}
+</script>
+</body>
+</html>

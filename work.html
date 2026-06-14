@@ -136,6 +136,13 @@ nav{
   background:#2e1a1a;
   aspect-ratio:9/16;
 }
+.video-grid-masonry .video-item::before,
+.hairstyle-grid-masonry .video-item::before{
+  content:'🎬';
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;opacity:0.3;
+}
 .video-grid-masonry .video-item video{
   width:100%;height:100%;object-fit:cover;display:block;
   transition:transform 0.4s;
@@ -163,6 +170,43 @@ nav{
 .video-item.video-error .video-play-overlay{background:rgba(46,26,26,0.55)}
 .video-item.video-error .play-circle{display:none}
 .video-item.video-error .video-error-msg{display:flex}
+
+/* HAIRSTYLE GRID (mixed images + videos) */
+.hairstyle-grid-masonry{
+  columns:3;column-gap:14px;
+}
+.hairstyle-grid-masonry .gallery-item{
+  break-inside:avoid;margin-bottom:14px;
+  border-radius:16px;overflow:hidden;
+  position:relative;cursor:pointer;
+  background:var(--cream);
+}
+.hairstyle-grid-masonry .gallery-item img{
+  width:100%;display:block;
+  transition:transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.hairstyle-grid-masonry .gallery-item:hover img{transform:scale(1.04)}
+.hairstyle-grid-masonry .gallery-item .gallery-overlay{
+  position:absolute;inset:0;
+  background:rgba(46,26,26,0);
+  transition:background 0.3s;
+  display:flex;align-items:center;justify-content:center;
+}
+.hairstyle-grid-masonry .gallery-item:hover .gallery-overlay{
+  background:rgba(46,26,26,0.15);
+}
+.hairstyle-grid-masonry .video-item{
+  break-inside:avoid;margin-bottom:14px;
+  border-radius:16px;overflow:hidden;
+  position:relative;cursor:pointer;
+  background:#2e1a1a;
+  aspect-ratio:9/16;
+}
+.hairstyle-grid-masonry .video-item video{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 0.4s;
+}
+.hairstyle-grid-masonry .video-item:hover video{transform:scale(1.04)}
 
 /* INFINITE SCROLL */
 .load-more-sentinel{height:60px;display:flex;align-items:center;justify-content:center;margin-top:12px}
@@ -234,10 +278,12 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
   .gallery-section{padding:0 12px 60px}
   .portfolio-grid{columns:2}
   .video-grid-masonry{columns:2}
+  .hairstyle-grid-masonry{columns:2}
 }
 @media(max-width:400px){
   .portfolio-grid{columns:1}
   .video-grid-masonry{columns:1}
+  .hairstyle-grid-masonry{columns:1}
 }
 </style>
 </head>
@@ -278,6 +324,10 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       Videos
     </button>
+    <button class="tab-pill" id="tab-hairstyle" onclick="switchTab('hairstyle')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+      Hairstyle
+    </button>
   </div>
 </div>
 
@@ -305,6 +355,17 @@ footer>p{font-size:13px;color:#a07070;margin-bottom:24px}
         <div class="loader-dots" id="vid-loader"><span></span><span></span><span></span></div>
       </div>
       <div class="end-msg" id="vid-end">✦ All videos loaded</div>
+    </div>
+
+    <!-- HAIRSTYLE PANEL -->
+    <div class="tab-panel" id="panel-hairstyle">
+      <div class="hairstyle-grid-masonry" id="hairstyle-grid">
+        <div class="loading-msg">Loading hairstyle looks…</div>
+      </div>
+      <div class="load-more-sentinel" id="hairstyle-sentinel">
+        <div class="loader-dots" id="hairstyle-loader"><span></span><span></span><span></span></div>
+      </div>
+      <div class="end-msg" id="hairstyle-end">✦ All hairstyle looks loaded</div>
     </div>
 
   </div>
@@ -347,6 +408,10 @@ function switchTab(tab){
 
 // ── LIGHTBOX ────────────────────────────────────────────────
 let lbImgs=[];let lbIdx=0;
+function openLightboxFrom(arr,src){
+  lbImgs=arr;
+  openLightbox(src);
+}
 function openLightbox(src){
   lbIdx=lbImgs.indexOf(src);
   document.getElementById('lbImg').src=src;
@@ -434,7 +499,7 @@ function renderNextBatch(){
     const item=document.createElement('div');
     item.className='gallery-item';
     item.innerHTML=`<img src="${url}" alt="Portfolio look by Megha" loading="lazy"/><div class="gallery-overlay"><div class="overlay-icon">🔍</div></div>`;
-    item.onclick=()=>openLightbox(url);
+    item.onclick=()=>openLightboxFrom(allImages,url);
     grid.appendChild(item);
   });
   imgLoaded+=batch.length;
@@ -540,9 +605,95 @@ async function fetchVideos(){
   }
 }
 
+// ── HAIRSTYLE (mixed images + videos, tag: "hairstyle") ──────
+const HAIRSTYLE_BATCH=15;
+let allHairstyle=[];
+let hairstyleImages=[];
+let hairstyleLoaded=0;
+let hairstyleDone=false;
+let hairstyleObserver=null;
+
+function renderHairstyleBatch(){
+  if(hairstyleDone) return;
+  const grid=document.getElementById('hairstyle-grid');
+  const batch=allHairstyle.slice(hairstyleLoaded, hairstyleLoaded+HAIRSTYLE_BATCH);
+  if(batch.length===0){
+    hairstyleDone=true;
+    document.getElementById('hairstyle-loader').classList.remove('active');
+    document.getElementById('hairstyle-end').classList.add('show');
+    return;
+  }
+  batch.forEach(entry=>{
+    const item=document.createElement('div');
+    if(entry.type==='image'){
+      item.className='gallery-item';
+      item.innerHTML=`<img src="${entry.url}" alt="Hairstyle look by Megha" loading="lazy"/><div class="gallery-overlay"><div class="overlay-icon">🔍</div></div>`;
+      item.onclick=()=>openLightboxFrom(hairstyleImages,entry.url);
+    }else{
+      const {src,poster}=cldVideo(entry.asset);
+      item.className='video-item';
+      item.onclick=()=>toggleVideo(item);
+      item.innerHTML=`<video src="${src}" poster="${poster}" loop playsinline preload="metadata" onerror="this.closest('.video-item').classList.add('video-error')"></video><div class="video-play-overlay"><div class="play-circle">▶</div></div><div class="video-error-msg">⚠ Video unavailable</div>`;
+    }
+    grid.appendChild(item);
+  });
+  hairstyleLoaded+=batch.length;
+  if(hairstyleLoaded>=allHairstyle.length){
+    hairstyleDone=true;
+    document.getElementById('hairstyle-loader').classList.remove('active');
+    document.getElementById('hairstyle-end').classList.add('show');
+  }
+}
+
+function initHairstyleInfiniteScroll(items){
+  allHairstyle=items;
+  hairstyleImages=items.filter(e=>e.type==='image').map(e=>e.url);
+  const grid=document.getElementById('hairstyle-grid');
+  grid.innerHTML='';
+
+  if(items.length===0){
+    grid.innerHTML='<div class="loading-msg">Hairstyle looks coming soon! 💇‍♀️</div>';
+    return;
+  }
+
+  renderHairstyleBatch();
+
+  const sentinel=document.getElementById('hairstyle-sentinel');
+  const loader=document.getElementById('hairstyle-loader');
+  hairstyleObserver=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting && !hairstyleDone){
+      loader.classList.add('active');
+      setTimeout(()=>{
+        renderHairstyleBatch();
+        loader.classList.remove('active');
+      },400);
+    }
+  },{rootMargin:'200px'});
+  hairstyleObserver.observe(sentinel);
+}
+
+async function fetchHairstyle(){
+  try{
+    const [imgData,vidData]=await Promise.all([
+      fetch(`https://res.cloudinary.com/${cloudName}/image/list/hairstyle.json`).then(r=>r.json()).catch(()=>({resources:[]})),
+      fetch(`https://res.cloudinary.com/${cloudName}/video/list/hairstyle.json`).then(r=>r.json()).catch(()=>({resources:[]}))
+    ]);
+    const images=(imgData.resources||[])
+      .filter(a=>!['mp4','mov','webm'].includes((a.format||'').toLowerCase()))
+      .map(a=>({type:'image',url:`https://res.cloudinary.com/${cloudName}/image/upload/v${a.version}/${a.public_id}.${a.format}`,created:a.created_at}));
+    const videos=(vidData.resources||[])
+      .map(a=>({type:'video',asset:a,created:a.created_at}));
+    const combined=[...images,...videos].sort((a,b)=>new Date(b.created)-new Date(a.created));
+    initHairstyleInfiniteScroll(combined);
+  }catch(e){
+    initHairstyleInfiniteScroll([]);
+  }
+}
+
 window.addEventListener('DOMContentLoaded',()=>{
   fetchPortfolio();
   fetchVideos();
+  fetchHairstyle();
 });
 </script>
 </body>
