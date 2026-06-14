@@ -200,7 +200,7 @@ const SUPABASE_KEY='sb_publishable_zOrrKM1d13aQoMBSlL9bng_r5_Wx8lW';
 const CLOUD_NAME='dt4j8dfql';
 const CLOUDINARY_UPLOAD_PRESET='REPLACE_ME'; // set this once the unsigned preset is created
 
-const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 // Build a web-safe src + poster from a {public_id, version}
 function cldVideo(asset){
@@ -233,7 +233,7 @@ loginForm.addEventListener('submit',async (e)=>{
   loginError.classList.remove('show');
   const email=document.getElementById('loginEmail').value.trim();
   const password=document.getElementById('loginPassword').value;
-  const {error}=await supabase.auth.signInWithPassword({email,password});
+  const {error}=await sb.auth.signInWithPassword({email,password});
   if(error){
     loginError.textContent=error.message;
     loginError.classList.add('show');
@@ -241,10 +241,10 @@ loginForm.addEventListener('submit',async (e)=>{
 });
 
 document.getElementById('logoutBtn').addEventListener('click',async ()=>{
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
 });
 
-supabase.auth.onAuthStateChange((event,session)=>{
+sb.auth.onAuthStateChange((event,session)=>{
   if(session){
     loginView.style.display='none';
     dashView.classList.add('active');
@@ -333,7 +333,7 @@ async function loadCategory(cat){
 
   let rows=[];
   try{
-    const {data}=await supabase.from('media_items').select('*').eq('category',cat.id);
+    const {data}=await sb.from('media_items').select('*').eq('category',cat.id);
     rows=data||[];
   }catch(e){ rows=[]; }
 
@@ -441,7 +441,7 @@ async function saveCategory(cat){
   saveBtn.disabled=true;
   saveBtn.textContent='Saving…';
 
-  const {error}=await supabase.from('media_items')
+  const {error}=await sb.from('media_items')
     .upsert(rowsToUpsert,{onConflict:'cloudinary_public_id,category'});
 
   saveBtn.disabled=false;
